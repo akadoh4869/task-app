@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             GroupUsersTableSeeder::class,
             GroupInvitationsTableSeeder::class,
             TasksTableSeeder::class,
+            TaskUserSeeder::class,
         ]);
     }
 }

@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('group_id')->nullable()->constrained()->onDelete('cascade'); // グループタスクならグループID
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade'); // タスクを作成した人
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null'); // 担当者
             $table->string('task_name'); // タスク名
             $table->text('description')->nullable(); // タスク詳細
             $table->timestamp('due_date')->nullable(); // 期日
