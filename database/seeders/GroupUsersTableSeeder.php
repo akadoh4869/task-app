@@ -18,7 +18,7 @@ class GroupUsersTableSeeder extends Seeder
         
         foreach ($users as $user) {
             DB::table('group_users')->insert([
-                'group_id' => $group->id, 'user_id' => $user->id, 'role' => $user->user_name === 'ほだか' ? 'admin' : 'member', 'approved' => true, 'created_at' => now(), 'updated_at' => now()
+                'group_id' => $group->id, 'user_id' => $user->id, 'role' => $user->user_name === 'ほだか' ? 'admin' : 'member', 'approved' => 1, 'created_at' => now(), 'updated_at' => now()
             ]);
         }
     }

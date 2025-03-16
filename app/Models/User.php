@@ -40,6 +40,9 @@ class User extends Authenticatable
     // ユーザーが参加しているグループ（多対多）
     public function groups()
     {
-        return $this->belongsToMany(Group::class, 'group_users');
+        return $this->belongsToMany(Group::class, 'group_users')
+                    ->withPivot('role', 'approved')
+                    ->wherePivot('approved', true); // 承認済みのグループのみ
     }
+    
 }

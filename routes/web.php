@@ -37,3 +37,9 @@ Route::get('/create',function(){
 Route::get('/setting',function(){
     return view('setting');
 });
+
+Route::get('/test',function(){
+    return view('test');
+});
+
+Route::get('/test', [App\Http\Controllers\HomeController::class, 'test'])->name('test');
