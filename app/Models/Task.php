@@ -35,4 +35,15 @@ class Task extends Model
     {
         return $this->belongsToMany(User::class, 'task_user');
     }
+
+    public function getStatusLabel()
+    {
+        $statusLabels = [
+            'not_started' => '未着手',
+            'in_progress' => '進行中',
+            'completed' => '完了'
+        ];
+
+        return $statusLabels[$this->status] ?? '不明';
+    }
 }

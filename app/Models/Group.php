@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Group extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'group_name', 'owner_id', 'description', 'invite_only'
@@ -26,7 +26,9 @@ class Group extends Model
     // グループに所属するユーザー（多対多）
     public function users()
     {
-        return $this->belongsToMany(User::class, 'group_users');
+        return $this->belongsToMany(User::class, 'group_users')
+                    ->withPivot('role', 'approved')
+                    ->wherePivot('approved', true); // 承認済みのユーザーのみ取得
     }
 
     // グループ内のタスク
