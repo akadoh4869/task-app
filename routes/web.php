@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\TaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,9 +23,13 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/task',function(){
-    return view('task/task');
+Route::get('/top',function(){
+    return view('task/top');
 });
+// routes/web.php
+
+Route::get('/top', [App\Http\Controllers\TaskController::class, 'index'])->name('top');
+
 
 Route::get('/detail',function(){
     return view('task/detail');
