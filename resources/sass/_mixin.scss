@@ -1,0 +1,39 @@
+@use "var" as var;
+
+// @mixin h1 {
+// //   font-size: var.$title;  //←書き方
+// }
+
+//コンテンツflex
+@mixin flex{
+    display: flex;
+    justify-content: left;
+    width: 100%;
+    padding: 0 58px;
+    box-sizing: border-box;
+}
+//コンテンツ横 レフト
+@mixin flex2{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+//コンテンツ横 センター
+@mixin flex3{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+//コンテンツ縦 ライト
+@mixin flex4{
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+
+
+
+// @mixin all {
+
+// }
+
