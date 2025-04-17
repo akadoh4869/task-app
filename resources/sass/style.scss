@@ -1,0 +1,71 @@
+@charset "UTF-8";
+
+@use "var";
+@use "mixin" as mixin;
+@use "header";
+// @use "main";
+
+// 全セレクタ
+
+ul{
+    list-style-type: none;
+    padding: 0;
+}
+
+#list{
+        gap: 20px;
+        border-bottom: solid 1px #000;
+}
+
+.year, #list{
+    @include mixin.flex;
+}
+
+.flex2{
+    @include mixin.flex2;
+}
+
+.flex3{
+    @include mixin.flex3;
+}
+
+.flex4{
+    @include mixin.flex4;
+}
+
+//task.blade
+
+.account
+{
+    height: 200px;
+}
+
+
+//タブコンテンツ切り替え
+
+.tab-container {
+  position: relative;
+
+  .content {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.8s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none; // 非アクティブな要素はクリックできないようにする
+
+    &.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 1;
+    }
+  }
+}
+
+// create.blade
+
+
+
