@@ -15,7 +15,7 @@ class Task extends Model
     ];
 
     protected $casts = [
-        'due_date' => 'datetime',
+        'start_date' => 'date','due_date' => 'datetime',
     ];
 
     // タスクを作成したユーザー

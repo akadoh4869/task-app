@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
-    <title>詳細ページ</title>
+    <title>共有事項</title>
 </head>
 <body>
     <header>
@@ -26,7 +26,6 @@
         </li>
         </ul>
     </header>
-    詳細
-    
+    共有
 </body>
 </html>
