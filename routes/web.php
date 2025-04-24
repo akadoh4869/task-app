@@ -23,21 +23,20 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/top',function(){
-    return view('task/top');
+Route::get('/task',function(){
+    return view('task/task');
 });
 // routes/web.php
 
-Route::get('/top', [App\Http\Controllers\TaskController::class, 'index'])->name('top');
+Route::get('/task', [App\Http\Controllers\TaskController::class, 'index'])->name('task.task');
+
+Route::get('/create', [TaskController::class, 'create'])->name('tasks.create');
 
 
-Route::get('/detail',function(){
-    return view('task/detail');
-});
+Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
 
-Route::get('/create',function(){
-    return view('task/create');
-});
+Route::get('/detail', [TaskController::class, 'detail'])->name('tasks.detail');
+Route::get('/share', [TaskController::class, 'share'])->name('tasks.share');
 
 Route::get('/setting',function(){
     return view('setting');
