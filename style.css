@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .flex {
   display: flex;
   justify-content: left;
@@ -66,6 +67,27 @@ ul {
 
 .account {
   height: 200px;
+}
+
+.content {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.textarea-container {
+  position: relative;
+  display: inline-block;
+}
+
+.create-image {
+  position: absolute;
+  top: -23px;
+  right: 0;
+  z-index: 1;
+}
+
+textarea.content {
+  padding-right: 40px; /* アイコンがかぶらないように調整（必要なら） */
 }
 
 .tab-container {
