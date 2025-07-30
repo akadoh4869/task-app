@@ -5,6 +5,7 @@
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ asset('css/tentative/task.css')}}"/>
     <title>タスク管理</title>
   </head>
   <body>
@@ -13,7 +14,7 @@
 
       <header>
         <!--  アプリ名 -->
-        <h1 class="appname">タスクアプリ名</h1>
+        <h1 class="appname">Task Me</h1>
 
         <!--メニューバー-->
         <ul>
@@ -22,9 +23,11 @@
           <li><a href="/share">共有事項</a></li>
           <li><a href="/setting">設定</a></li>
           <li>
-            <a href="#"
-              ><img src="./img/no_1.jpg" alt="アカウント" class="account"
-            /></a>
+            <a href="#">
+             <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント" class="account">
+
+
+            </a>
           </li>
         </ul>
       </header>
@@ -33,21 +36,24 @@
         <!--コンテンツ-->
         <section class="t-head">
           <div class="year">
-            <a href="">
-              <img src="./img/no_3.png" alt="pre-year" width="50px" />
-              <!--前の年へ-->
+            <a href="#" id="prevYear">
+              <img src="{{ asset('images/left.png') }}" alt="前の年" width="50px" />
             </a>
-            <p>2025</p>
-            <!--表示する年-->
-            <a href="">
-              <img src="./img/no_2.png" alt="next-year" width="50px" />
-              <!--次の年へ-->
+            <p id="yearDisplay">2025年</p>
+            <a href="#" id="nextYear">
+              <img src="{{ asset('images/right.png') }}" alt="次の年" width="50px" />
             </a>
+            
           </div>
           <ul id="list">
-            <li class="tab1">リスト</li>
-            <li class="tab2">カレンダー</li>
+            <li class="tab1 active" data-tab="list">リスト</li>
+            <li class="tab2" data-tab="calendar">カレンダー</li>
           </ul>
+
+          <div class="tab-content">
+            <div id="listContent" class="tab-pane">リストの内容</div>
+            <div id="calendarContent" class="tab-pane hidden">カレンダーの内容</div>
+          </div>
         </section>
 
         <div class="tab-container">
@@ -71,7 +77,7 @@
                     </tr>
                 @endif
             </table>
-        </section>
+          </section>
         
 
           <section id="content-calendar" class="content">
@@ -87,3 +93,39 @@
 
  
 </html>
+<script> 
+  document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('#list li');
+    const contents = document.querySelectorAll('.tab-container .content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        // タブの切り替え
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        // 対応するセクションを表示
+        const targetId = this.dataset.tab === 'list' ? 'content-list' : 'content-calendar';
+        contents.forEach(c => c.classList.remove('active'));
+        document.getElementById(targetId).classList.add('active');
+      });
+    });
+  });
+
+  let currentYear = 2025; // 初期値。Laravelの変数で渡してもOK
+  const yearDisplay = document.getElementById('yearDisplay');
+
+  document.getElementById('prevYear').addEventListener('click', function(e) {
+    e.preventDefault();
+    currentYear--;
+    yearDisplay.textContent = currentYear + '年';
+  });
+
+  document.getElementById('nextYear').addEventListener('click', function(e) {
+    e.preventDefault();
+    currentYear++;
+    yearDisplay.textContent = currentYear + '年';
+  });
+
+</script>
+

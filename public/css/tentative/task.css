@@ -1,0 +1,33 @@
+.year {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+img.account {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+
+
+
+.content {
+  display: none;
+}
+.content.active {
+  display: block;
+}
+#list li.active {
+  font-weight: bold;
+  border-bottom: 2px solid #007bff;
+  cursor: default;
+}
+#list li {
+  display: inline-block;
+  margin-right: 20px;
+  cursor: pointer;
+}
