@@ -28,7 +28,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/top';
+    protected $redirectTo = '/task';
 
     /**
      * Create a new controller instance.
@@ -50,6 +50,7 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
+            'user_name' => ['required', 'string', 'max:255', 'unique:users'], // ←追加
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -65,8 +66,10 @@ class RegisterController extends Controller
     {
         return User::create([
             'name' => $data['name'],
+            'user_name' => $data['user_name'], // 追加
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'avatar' => 'images/default.png', // ✅ ここでデフォルト画像を設定
         ]);
     }
 }
