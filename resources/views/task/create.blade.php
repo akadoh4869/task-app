@@ -4,31 +4,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./task.css" />
-    <link rel="stylesheet" href="./common.css">
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <title>Document</title>
 </head>
 
 <body>
+    
     <div class="flex">
-        <header>
-            <!--  アプリ名 -->
-            <!-- <h1 class="appname">タスクアプリ名</h1> -->
 
-            <!--メニューバー-->
-            <ul>
-                <li class="appname">タスクアプリ名</li>
-                <li><a href="index.php">タスク管理</a></li>
-                <li><a href="create.php">作成</a></li>
-                <li><a href="#">共有事項</a></li>
-                <li><a href="setting.php">設定</a></li>
-                <li>
-                    <a href="#"><img src="./img/no_1.jpg" alt="アカウント" class="account" />
-                    </a>
-                </li>
-            </ul>
-        </header>
+        <header>
+        <!--  アプリ名 -->
+        <h1 class="appname">Task Me</h1>
+
+        <!--メニューバー-->
+        <ul>
+          <li><a href="/task">タスク管理</a></li>
+          <li><a href="/create">作成</a></li>
+          <li><a href="/share">共有事項</a></li>
+          <li><a href="/setting">設定</a></li>
+          <li>
+            <a href="#">
+             <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント" class="account">
+
+
+            </a>
+          </li>
+        </ul>
+      </header>
+       
         <main>
             <h2 class="title">新規タスク</h2>
             <form action="" style="width: 800px;">

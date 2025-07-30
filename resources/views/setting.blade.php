@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="stylesheet" href="./task.css" />
-  <link rel="stylesheet" href="./common.css">
+  @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+  <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Document</title>
 </head>
@@ -12,23 +12,25 @@
 <body>
   <div class="flex">
 
-    <header>
-      <!--  アプリ名 -->
-      <!-- <h1 class="appname">タスクアプリ名</h1> -->
+   <header>
+        <!--  アプリ名 -->
+        <h1 class="appname">Task Me</h1>
 
-      <!--メニューバー-->
-      <ul>
-        <li class="appname">タスクアプリ名</li>
-        <li><a href="index.php">タスク管理</a></li>
-        <li><a href="create.php">作成</a></li>
-        <li><a href="#">共有事項</a></li>
-        <li><a href="setting.php">設定</a></li>
-        <li>
-          <a href="#"><img src="./img/no_1.jpg" alt="アカウント" class="account" />
-          </a>
-        </li>
-      </ul>
-    </header>
+        <!--メニューバー-->
+        <ul>
+          <li><a href="/task">タスク管理</a></li>
+          <li><a href="/create">作成</a></li>
+          <li><a href="/share">共有事項</a></li>
+          <li><a href="/setting">設定</a></li>
+          <li>
+            <a href="#">
+             <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント" class="account">
+
+
+            </a>
+          </li>
+        </ul>
+      </header>
     <main>
       <!--コンテンツ-->
       <section class="">
