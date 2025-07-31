@@ -33,7 +33,9 @@ Route::get('/task', [App\Http\Controllers\TaskController::class, 'index'])->name
 Route::get('/create', [TaskController::class, 'create'])->name('tasks.create');
 
 
-Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
+// Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
+Route::post('/task', [TaskController::class, 'store'])->name('task.store');
+
 
 Route::get('/detail', [TaskController::class, 'detail'])->name('tasks.detail');
 Route::get('/share', [TaskController::class, 'share'])->name('tasks.share');

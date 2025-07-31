@@ -59,7 +59,7 @@
         <div class="tab-container">
           <section id="content-list" class="content active">
             <table>
-                @foreach ($allPersonalTasks as $task)
+               @foreach ($groupTasks as $task)
                     <tr class="flex2">
                         <th>
                             {{ optional($task->start_date)->format('Ymd') ?? '未設定' }}〜{{ optional($task->due_date)->format('Ymd') ?? '未設定' }}
@@ -70,12 +70,13 @@
                         </td>
                     </tr>
                 @endforeach
-        
-                @if ($allPersonalTasks->isEmpty())
+
+                @if ($groupTasks->isEmpty())
                     <tr>
-                        <td colspan="2">現在、個人タスクはありません。</td>
+                        <td colspan="2">現在、グループタスクはありません。</td>
                     </tr>
                 @endif
+
             </table>
           </section>
         
