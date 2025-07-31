@@ -2,17 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{ asset('css/tentative/task.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
     <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
-    <title>タスク管理</title>
+    <script src="{{ asset('js/tentative/common.js') }}"></script>
+    <title>タスク管理ページ</title>
   </head>
   <body>
     <div class="flex">
       
-
       <header>
         <!--  アプリ名 -->
         <h1 class="appname">Task Me</h1>

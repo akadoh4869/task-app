@@ -4,9 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+  <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
+  <title>設定</title>
 </head>
 
 <body>
