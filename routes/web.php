@@ -38,7 +38,12 @@ Route::post('/task', [TaskController::class, 'store'])->name('task.store');
 
 
 Route::get('/detail', [TaskController::class, 'detail'])->name('tasks.detail');
-Route::get('/share', [TaskController::class, 'share'])->name('tasks.share');
+Route::get('/task/detail/{id}', [TaskController::class, 'detail'])->name('task.detail');
+Route::patch('/task/{id}/status', [TaskController::class, 'updateStatus'])->name('task.updateStatus');
+Route::patch('/task/{id}/detail', [TaskController::class, 'updateDetail'])->name('task.updateDetail');
+
+Route::get('/task/share', [TaskController::class, 'share'])->name('task.share');
+// Route::get('/share', [TaskController::class, 'share'])->name('tasks.share');
 
 Route::get('/setting',function(){
     return view('setting');

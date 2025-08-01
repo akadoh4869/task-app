@@ -22,7 +22,7 @@
         <ul>
           <li><a href="/task">タスク管理</a></li>
           <li><a href="/create">作成</a></li>
-          <li><a href="/share">共有事項</a></li>
+          <li><a href="/task/share">共有事項</a></li>
           <li><a href="/setting">設定</a></li>
           <li>
             <a href="#">
@@ -57,29 +57,42 @@
         </section>
 
         <div class="tab-container">
+          <form method="GET" action="{{ route('task.share') }}">
+              <label for="group_id">グループ選択：</label>
+              <select name="group_id" id="group_id" onchange="this.form.submit()">
+                  <option value="">-- グループを選択 --</option>
+                  @foreach ($groups as $group)
+                      <option value="{{ $group->id }}" {{ $selectedGroupId == $group->id ? 'selected' : '' }}>
+                          {{ $group->group_name }}
+                      </option>
+                  @endforeach
+              </select>
+          </form>
+
           <section id="content-list" class="content active">
-            <table>
-               @foreach ($groupTasks as $task)
-                    <tr class="flex2">
-                        <th>
-                            {{ optional($task->start_date)->format('Ymd') ?? '未設定' }}〜{{ optional($task->due_date)->format('Ymd') ?? '未設定' }}
-                        </th>
-                        <td class="flex2">
-                            <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
-                            <p>{{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}</p>
-                        </td>
-                    </tr>
-                @endforeach
+              <table>
+                  @foreach ($groupTasks as $task)
+                      <tr class="flex2">
+                          <th>
+                              {{ optional($task->start_date)->format('Ymd') ?? '未設定' }}〜
+                              {{ optional($task->due_date)->format('Ymd') ?? '未設定' }}
+                          </th>
+                          <td class="flex2">
+                              <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
+                              <a href="{{ route('task.detail', $task->id) }}">
+                                  {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
+                              </a>
+                          </td>
+                      </tr>
+                  @endforeach
 
-                @if ($groupTasks->isEmpty())
-                    <tr>
-                        <td colspan="2">現在、グループタスクはありません。</td>
-                    </tr>
-                @endif
-
-            </table>
+                  @if ($groupTasks->isEmpty())
+                      <tr>
+                          <td colspan="2">現在、グループタスクはありません。</td>
+                      </tr>
+                  @endif
+              </table>
           </section>
-        
 
           <section id="content-calendar" class="content">
             <p>カレンダー表示エリア</p>

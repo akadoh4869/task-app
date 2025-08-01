@@ -33,7 +33,7 @@ class Task extends Model
     // タスクの担当者（多対多）
     public function assignedUsers()
     {
-        return $this->belongsToMany(User::class, 'task_user');
+        return $this->belongsToMany(User::class, 'task_user', 'task_id', 'user_id');
     }
 
     public function getStatusLabel()
@@ -46,4 +46,10 @@ class Task extends Model
 
         return $statusLabels[$this->status] ?? '不明';
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(TaskAttachment::class);
+    }
+
 }
