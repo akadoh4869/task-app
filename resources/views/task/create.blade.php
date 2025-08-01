@@ -23,7 +23,7 @@
             <ul>
             <li><a href="/task">タスク管理</a></li>
             <li><a href="/create">作成</a></li>
-            <li><a href="/share">共有事項</a></li>
+            <li><a href="/task/share">共有事項</a></li>
             <li><a href="/setting">設定</a></li>
             <li>
                 <a href="#">

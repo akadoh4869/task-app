@@ -22,7 +22,7 @@
         <ul>
           <li><a href="/task">タスク管理</a></li>
           <li><a href="/create">作成</a></li>
-          <li><a href="/share">共有事項</a></li>
+          <li><a href="/task/share">共有事項</a></li>
           <li><a href="/setting">設定</a></li>
           <li>
             <a href="#">
@@ -68,7 +68,10 @@
                         </th>
                         <td class="flex2">
                             <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
-                            <p>{{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}</p>
+                            {{-- <p>{{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}</p> --}}
+                            <a href="{{ route('task.detail', $task->id) }}">
+                              {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
+                            </a>
                         </td>
                     </tr>
                 @endforeach
