@@ -57,48 +57,64 @@
         </section>
 
         <div class="tab-container">
-          <form method="GET" action="{{ route('task.share') }}">
-              <label for="group_id">グループ選択：</label>
-              <select name="group_id" id="group_id" onchange="this.form.submit()">
-                  <option value="">-- グループを選択 --</option>
-                  @foreach ($groups as $group)
-                      <option value="{{ $group->id }}" {{ $selectedGroupId == $group->id ? 'selected' : '' }}>
-                          {{ $group->group_name }}
-                      </option>
-                  @endforeach
-              </select>
-          </form>
+            <form method="GET" action="{{ route('task.share') }}">
+                <label for="group_id">グループ選択：</label>
+                <select name="group_id" id="group_id" onchange="this.form.submit()">
+                    @foreach ($groups as $group)
+                        <option value="{{ $group->id }}" {{ $selectedGroupId == $group->id ? 'selected' : '' }}>
+                            {{ $group->group_name }}
+                        </option>
+                    @endforeach
 
-          <section id="content-list" class="content active">
-              <table>
-                  @foreach ($groupTasks as $task)
-                      <tr class="flex2">
-                          <th>
-                              {{ optional($task->start_date)->format('Ymd') ?? '未設定' }}〜
-                              {{ optional($task->due_date)->format('Ymd') ?? '未設定' }}
-                          </th>
-                          <td class="flex2">
-                              <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
-                              <a href="{{ route('task.detail', $task->id) }}">
-                                  {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
-                              </a>
-                          </td>
-                      </tr>
-                  @endforeach
+                    {{-- グループ作成オプション --}}
+                    <option value="create" {{ $selectedGroupId === 'create' ? 'selected' : '' }}>
+                        ＋ グループを作る
+                    </option>
+                </select>
+            </form>
 
-                  @if ($groupTasks->isEmpty())
-                      <tr>
-                          <td colspan="2">現在、グループタスクはありません。</td>
-                      </tr>
-                  @endif
-              </table>
-          </section>
+            {{-- 「グループを作る」が選択されているとき or 未所属のとき --}}
+            @if ($selectedGroupId === 'create' || $groups->isEmpty())
+                <div style="text-align: center; margin-top: 50px;">
+                    <p>グループを作成してタスクを共有しましょう。</p>
+                    <a href="{{ route('group.create') }}" class="btn" style="padding: 10px 20px; background: #3490dc; color: white; border-radius: 5px; text-decoration: none;">
+                        グループを作成する
+                    </a>
+                </div>
+            @elseif ($selectedGroupId)
+                {{-- グループタスク表示 --}}
+                <section id="content-list" class="content active">
+                    <table>
+                        @foreach ($groupTasks as $task)
+                            <tr class="flex2">
+                                <th>
+                                    {{ optional($task->start_date)->format('Ymd') ?? '未設定' }}〜
+                                    {{ optional($task->due_date)->format('Ymd') ?? '未設定' }}
+                                </th>
+                                <td class="flex2">
+                                    <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
+                                    <a href="{{ route('task.detail', $task->id) }}">
+                                        {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
 
-          <section id="content-calendar" class="content">
-            <p>カレンダー表示エリア</p>
+                        @if ($groupTasks->isEmpty())
+                            <tr>
+                                <td colspan="2">現在、グループタスクはありません。</td>
+                            </tr>
+                        @endif
+                    </table>
+                </section>
 
-          </section>
+                <section id="content-calendar" class="content">
+                    <p>カレンダー表示エリア</p>
+                </section>
+            @endif
         </div>
+
+
 
       </main>
 

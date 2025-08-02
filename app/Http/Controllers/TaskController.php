@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\User; 
 use App\Models\Group;  
 use App\Models\TaskAttachment;
+use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
@@ -46,16 +47,17 @@ class TaskController extends Controller
 
     public function create()
     {
-        $user = Auth::user();
-        $groups = $user->groups; // 所属グループ取得
+        $user = Auth::user(); // ← この行を追加
+        $groups = $user->groups()->with('users')->get(); // 所属グループ＋そのメンバー
 
-        return view('task/create', compact('groups'));
+        return view('task.create', compact('user', 'groups'));
     }
 
+    
     public function store(Request $request)
     {
         $request->validate([
-            'task_type_combined' => 'required|string', // solo または group_xxx
+            'task_type_combined' => 'required|string', // "solo" または "group_{id}"
             'task_name' => 'required|string|max:255',
             'start_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
@@ -63,25 +65,43 @@ class TaskController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
 
+        $user = Auth::user();
+
         $task = new Task();
         $task->task_name = $request->task_name;
         $task->start_date = $request->start_date;
         $task->due_date = $request->due_date;
         $task->description = $request->description;
-        $task->created_by = Auth::id();
+        $task->created_by = $user->id;
         $task->status = 'not_started';
 
-        // group_id 判定
+        // 個人タスク or グループタスクの判定
         $typeValue = $request->task_type_combined;
-        if ($typeValue === 'solo') {
+
+        if ($typeValue === 'personal') {
             $task->group_id = null;
-        } elseif (str_starts_with($typeValue, 'group_')) {
-            $task->group_id = (int) str_replace('group_', '', $typeValue);
+        } elseif (Str::startsWith($typeValue, 'group_')) {
+            $groupId = (int) Str::after($typeValue, 'group_');
+
+            // 念のため、ユーザーがそのグループに属しているか確認（セキュリティ）
+            if ($user->groups->pluck('id')->contains($groupId)) {
+                $task->group_id = $groupId;
+            } else {
+                return back()->withErrors(['task_type_combined' => '不正なグループが選択されました。']);
+            }
         }
 
-        $task->save(); // 先にタスク保存して ID を確定
+        $task->save(); // タスク保存（ID確定）
 
-        // 画像があれば task_attachments に保存
+        // 担当者（assigned_user_ids[]）が送信されていたら、アサイン
+        if ($request->has('assigned_user_ids') && is_array($request->assigned_user_ids)) {
+            $task->assignedUsers()->sync($request->assigned_user_ids);
+        } else {
+            // 個人タスクの場合は作成者のみをアサイン
+            $task->assignedUsers()->attach($user->id);
+        }
+
+        // 添付ファイルがある場合
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $path = $file->store('task_files', 'public');
@@ -91,7 +111,7 @@ class TaskController extends Controller
                 'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
-                'type' => str_starts_with($file->getMimeType(), 'image') ? 'image' : 'file',
+                'type' => Str::startsWith($file->getMimeType(), 'image') ? 'image' : 'file',
             ]);
         }
 
@@ -102,15 +122,34 @@ class TaskController extends Controller
     {
         $user = Auth::user();
 
-        // 所属グループを取得
-        $groups = $user->groups;
+        // 参加順でグループを取得（created_at順に並べる）
+        $groups = $user->groups()->orderBy('created_at')->get();
 
-        // 選択中のグループIDをリクエストから取得
+        // リクエストされたgroup_idを取得
         $selectedGroupId = $request->input('group_id');
 
-        // 選択されたグループのタスクを取得（所属確認付き）
+        // 「グループを作る」が選択されたらリダイレクト
+        if ($selectedGroupId === 'create') {
+            return redirect()->route('group.create');
+        }
+
+        // リクエストに group_id が含まれている場合はセッションに保存
+        if ($selectedGroupId !== null) {
+            session(['selected_group_id' => $selectedGroupId]);
+        } else {
+            // リクエストに group_id がない（初回アクセスなど）の場合
+            $selectedGroupId = session('selected_group_id');
+
+            // セッションにもまだ値がない（本当の初回）の場合、最初のグループを使用
+            if (!$selectedGroupId && $groups->isNotEmpty()) {
+                $selectedGroupId = $groups->first()->id;
+                session(['selected_group_id' => $selectedGroupId]); // 初回に保存
+            }
+        }
+
+        // 有効な group_id のときだけタスク取得
         $groupTasks = collect();
-        if ($selectedGroupId && $groups->contains('id', $selectedGroupId)) {
+        if ($selectedGroupId && $groups->pluck('id')->contains((int) $selectedGroupId)) {
             $groupTasks = Task::where('group_id', $selectedGroupId)
                 ->orderBy('start_date')
                 ->get();

@@ -41,14 +41,34 @@
                 <form action="{{ route('task.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
+                    @php
+                        $groups = Auth::user()->groups;
+                    @endphp
+
                     <div class="flex2">
-                        <select name="task_type_combined" id="task-type">
-                            <option value="solo">個人タスク</option>
-                            {{-- グループが複数ある場合は以下のようにループでも可 --}}
-                            <option value="group_1">グループ1</option>
-                            <option value="group_2">グループ2</option>
+                        <label>タスクの種類:</label>
+                        <!-- タスクの種別選択 -->
+                        <select name="task_type_combined" id="task-type" onchange="toggleAssigneeSection()">
+                            <option value="personal">個人タスク</option>
+                            @foreach ($user->groups as $group)
+                                <option value="group_{{ $group->id }}">{{ $group->group_name }}</option>
+                            @endforeach
                         </select>
-                        <input type="text" id="ifgroup" style="display: none;">
+
+                        <!-- 担当者選択（グループタスク用） -->
+                        <div id="assignee-section" style="display: none; margin-top: 15px;">
+                            <p>担当者を選択:</p>
+                            @foreach ($user->groups as $group)
+                                <div class="assignee-group" data-group-id="{{ $group->id }}" style="display: none;">
+                                    @foreach ($group->users as $member)
+                                        <label style="margin-right: 10px;">
+                                            <input type="checkbox" name="assigned_user_ids[]" value="{{ $member->id }}">
+                                            {{ $member->user_name }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
 
                     <br>
@@ -114,6 +134,32 @@
             }
 
             hiddenBlock.style.display = "none";
+        }
+
+        function toggleGroupSelect() {
+            const typeSelect = document.getElementById('task-type');
+            const groupSelect = document.getElementById('group-select');
+            groupSelect.style.display = typeSelect.value === 'group' ? 'inline-block' : 'none';
+        }
+
+        function toggleAssigneeSection() {
+            const select = document.getElementById('task-type');
+            const value = select.value;
+            const assigneeSection = document.getElementById('assignee-section');
+
+            const allGroups = document.querySelectorAll('.assignee-group');
+            allGroups.forEach(g => g.style.display = 'none');
+
+            if (value.startsWith('group_')) {
+                const groupId = value.replace('group_', '');
+                const groupElement = document.querySelector(`.assignee-group[data-group-id="${groupId}"]`);
+                if (groupElement) {
+                    groupElement.style.display = 'block';
+                    assigneeSection.style.display = 'block';
+                }
+            } else {
+                assigneeSection.style.display = 'none';
+            }
         }
     </script>
 
