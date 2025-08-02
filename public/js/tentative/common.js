@@ -1,32 +1,40 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const tabs = document.querySelectorAll('#list li');
-    const contents = document.querySelectorAll('.tab-container .content');
+  // タブ切り替え処理（必要に応じて）
+  const tabs = document.querySelectorAll('#list li');
+  const contents = document.querySelectorAll('.tab-container .content');
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', function () {
-        // タブの切り替え
-        tabs.forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function () {
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
 
-        // 対応するセクションを表示
-        const targetId = this.dataset.tab === 'list' ? 'content-list' : 'content-calendar';
-        contents.forEach(c => c.classList.remove('active'));
-        document.getElementById(targetId).classList.add('active');
-      });
+      const targetId = this.dataset.tab === 'list' ? 'content-list' : 'content-calendar';
+      contents.forEach(c => c.classList.remove('active'));
+      document.getElementById(targetId).classList.add('active');
     });
-});
+  });
 
-let currentYear = 2025; // 初期値。Laravelの変数で渡してもOK
-const yearDisplay = document.getElementById('yearDisplay');
+  // 年の制御ロジック
+  const yearDisplay = document.getElementById('yearDisplay');
+  let currentYear = parseInt(yearDisplay.dataset.year);
 
-document.getElementById('prevYear').addEventListener('click', function(e) {
-e.preventDefault();
-currentYear--;
-yearDisplay.textContent = currentYear + '年';
-});
+  const prevBtn = document.getElementById('prevYear');
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const prevYear = currentYear - 1;
+      if (prevYear >= 2025) {
+        window.location.href = '?year=' + prevYear;
+      }
+    });
+  }
 
-document.getElementById('nextYear').addEventListener('click', function(e) {
-e.preventDefault();
-currentYear++;
-yearDisplay.textContent = currentYear + '年';
+  const nextBtn = document.getElementById('nextYear');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const nextYear = currentYear + 1;
+      window.location.href = '?year=' + nextYear;
+    });
+  }
 });

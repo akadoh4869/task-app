@@ -101,6 +101,12 @@
 
                     <br>
 
+                    {{-- 詳細編集 --}}
+                    <p>詳細:</p>
+                    <textarea name="description" rows="5" style="width: 100%;"></textarea>
+
+                    <br><br>
+
                     <button type="submit" class="create-button">作成</button>
                 </form>
 
