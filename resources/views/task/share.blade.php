@@ -36,14 +36,19 @@
         <!--コンテンツ-->
         <section class="t-head">
           <div class="year">
-            <a href="#" id="prevYear">
-              <img src="{{ asset('images/left.png') }}" alt="前の年" width="50px" />
-            </a>
-            <p id="yearDisplay">2025年</p>
+            @if ($year > 2025)
+              <a href="#" id="prevYear">
+                <img src="{{ asset('images/left.png') }}" alt="前の年" width="50px" />
+              </a>
+            @else
+              <span style="width: 50px; display: inline-block;"></span>
+            @endif
+
+            <p id="yearDisplay" data-year="{{ $year }}">{{ $year }}年</p>
+
             <a href="#" id="nextYear">
               <img src="{{ asset('images/right.png') }}" alt="次の年" width="50px" />
             </a>
-            
           </div>
           <ul id="list">
             <li class="tab1 active" data-tab="list">リスト</li>
