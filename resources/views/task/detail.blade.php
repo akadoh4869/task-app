@@ -42,7 +42,14 @@
           <h2>{{ $task->task_name }}</h2>
 
           <p>作成日: {{ $task->created_at->format('Y年m月d日') }}</p>
-          <p>期限: {{ optional($task->due_date)->format('Y年m月d日') ?? '未設定' }}</p>
+          {{-- <p>期限: {{ optional($task->due_date)->format('Y年m月d日') ?? '未設定' }}</p> --}}
+          {{-- ✅ ここを修正済み --}}
+          <p>開始日:</p>
+          <input type="date" name="start_date" value="{{ optional($task->start_date)->format('Y-m-d') }}" max="9999-12-31">
+
+          <p>期限:</p>
+          <input type="date" name="due_date" value="{{ optional($task->due_date)->format('Y-m-d') }}" max="9999-12-31">
+
 
           @if ($task->group)
               <p>グループ: {{ $task->group->group_name }}</p>

@@ -38,15 +38,21 @@
         <!--コンテンツ-->
         <section class="t-head">
           <div class="year">
-            <a href="#" id="prevYear">
-              <img src="{{ asset('images/left.png') }}" alt="前の年" width="50px" />
-            </a>
-            <p id="yearDisplay">2025年</p>
+            @if ($year > 2025)
+              <a href="#" id="prevYear">
+                <img src="{{ asset('images/left.png') }}" alt="前の年" width="50px" />
+              </a>
+            @else
+              <span style="width: 50px; display: inline-block;"></span>
+            @endif
+
+            <p id="yearDisplay" data-year="{{ $year }}">{{ $year }}年</p>
+
             <a href="#" id="nextYear">
               <img src="{{ asset('images/right.png') }}" alt="次の年" width="50px" />
             </a>
-            
           </div>
+
           <ul id="list">
             <li class="tab1 active" data-tab="list">リスト</li>
             <li class="tab2" data-tab="calendar">カレンダー</li>
@@ -61,26 +67,26 @@
         <div class="tab-container">
           <section id="content-list" class="content active">
             <table>
-                @foreach ($allPersonalTasks as $task)
-                    <tr class="flex2">
-                        <th>
-                            {{ optional($task->start_date)->format('Ymd') ?? '未設定' }}〜{{ optional($task->due_date)->format('Ymd') ?? '未設定' }}
-                        </th>
-                        <td class="flex2">
-                            <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
-                            {{-- <p>{{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}</p> --}}
-                            <a href="{{ route('task.detail', $task->id) }}">
-                              {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
-                            </a>
-                        </td>
-                    </tr>
-                @endforeach
-        
-                @if ($allPersonalTasks->isEmpty())
-                    <tr>
-                        <td colspan="2">現在、個人タスクはありません。</td>
-                    </tr>
-                @endif
+              @foreach ($allPersonalTasks as $task)
+                <tr class="flex2">
+                  <th>
+                    {{ optional($task->start_date)->format('md') ?? '未設定' }}〜
+                    {{ optional($task->due_date)->format('md') ?? '未設定' }}
+                  </th>
+                  <td class="flex2">
+                    <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
+                    <a href="{{ route('task.detail', $task->id) }}">
+                      {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
+                    </a>
+                  </td>
+                </tr>
+              @endforeach
+
+              @if ($allPersonalTasks->isEmpty())
+                <tr>
+                  <td colspan="2">現在、{{ $year }}年のタスクはありません。</td>
+                </tr>
+              @endif
             </table>
           </section>
         
@@ -98,39 +104,5 @@
 
  
 </html>
-<script> 
-  document.addEventListener('DOMContentLoaded', function () {
-    const tabs = document.querySelectorAll('#list li');
-    const contents = document.querySelectorAll('.tab-container .content');
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', function () {
-        // タブの切り替え
-        tabs.forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-
-        // 対応するセクションを表示
-        const targetId = this.dataset.tab === 'list' ? 'content-list' : 'content-calendar';
-        contents.forEach(c => c.classList.remove('active'));
-        document.getElementById(targetId).classList.add('active');
-      });
-    });
-  });
-
-  let currentYear = 2025; // 初期値。Laravelの変数で渡してもOK
-  const yearDisplay = document.getElementById('yearDisplay');
-
-  document.getElementById('prevYear').addEventListener('click', function(e) {
-    e.preventDefault();
-    currentYear--;
-    yearDisplay.textContent = currentYear + '年';
-  });
-
-  document.getElementById('nextYear').addEventListener('click', function(e) {
-    e.preventDefault();
-    currentYear++;
-    yearDisplay.textContent = currentYear + '年';
-  });
-
-</script>
 

@@ -13,37 +13,42 @@ use Illuminate\Support\Str;
 class TaskController extends Controller
 {
     
-   public function index()
+   public function index(Request $request)
     {
         $user = Auth::user();
+        $year = $request->input('year', 2025); // デフォルトは2025年
 
-        // 所属グループと、そのグループのメンバー・タスク・担当者を取得
         $groups = $user->groups()->with(['users', 'tasks.assignedUsers'])->get();
 
-        // 自分が作成したタスクのうち、
-        // グループタスクはアサインされているもののみ表示、個人タスクはすべて表示
+        // 作成タスク（個人のみ or グループかつアサインされている）
         $createdTasks = $user->createdTasks->filter(function ($task) use ($user) {
-            // グループタスクの場合はアサインされているかチェック
             if ($task->group_id !== null) {
                 return $task->assignedUsers->contains('id', $user->id);
             }
-            // 個人タスクは表示対象
             return true;
         });
 
-        // 自分が現在アサインされているタスク
+        // 担当タスク
         $assignedTasks = $user->assignedTasks;
 
-        // 作成＋担当のタスクをマージ・重複除外・期限順に並べる
-        $allPersonalTasks = $createdTasks
-            ->merge($assignedTasks)
-            ->unique('id')
-            ->sortBy(function ($task) {
-                return $task->due_date ?? now()->addYears(100);
-            });
+        // 両方マージし重複除去
+        $allTasks = $createdTasks->merge($assignedTasks)->unique('id');
 
-        return view('task/task', compact('user', 'groups', 'allPersonalTasks'));
+        // 選択年に絞り込み（due_dateがその年 or due_dateがnullのものも常に表示）
+        $filteredTasks = $allTasks->filter(function ($task) use ($year) {
+            return is_null($task->due_date) || $task->due_date->year == $year;
+        })->sortBy(function ($task) {
+            return $task->due_date ?? now()->addYears(100); // nullは一番後ろ
+        });
+
+        return view('task.task', [
+            'user' => $user,
+            'groups' => $groups,
+            'allPersonalTasks' => $filteredTasks,
+            'year' => $year,
+        ]);
     }
+
 
     public function create()
     {
@@ -185,11 +190,15 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'assigned_user_ids' => 'array',
             'assigned_user_ids.*' => 'exists:users,id',
+            'start_date' => 'nullable|date',
+            'due_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $task = Task::with('assignedUsers')->findOrFail($id);
         $task->status = $request->status;
         $task->description = $request->description;
+        $task->start_date = $request->start_date;
+        $task->due_date = $request->due_date;
         $task->save();
 
         // 担当者更新
