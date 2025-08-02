@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\GroupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,12 @@ Route::patch('/task/{id}/detail', [TaskController::class, 'updateDetail'])->name
 
 Route::get('/task/share', [TaskController::class, 'share'])->name('task.share');
 // Route::get('/share', [TaskController::class, 'share'])->name('tasks.share');
+Route::get('/group/create', [GroupController::class, 'create'])->name('group.create');
+
+
+
+Route::get('/group/create', [GroupController::class, 'create'])->name('group.create');
+
 
 Route::get('/setting',function(){
     return view('setting');
