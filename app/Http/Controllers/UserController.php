@@ -14,32 +14,6 @@ class UserController extends Controller
         return view('users.account');
     }
 
-    // public function index(Request $request)
-    // {
-    //     $user = Auth::user();
-
-    //     // 完了タスク（個人 or グループで自分がアサインされたもの）
-    //     $createdTasks = $user->createdTasks->filter(function ($task) use ($user) {
-    //         if ($task->group_id !== null) {
-    //             return $task->assignedUsers->contains('id', $user->id);
-    //         }
-    //         return true;
-    //     });
-
-    //     $assignedTasks = $user->assignedTasks;
-
-    //     $allTasks = $createdTasks->merge($assignedTasks)->unique('id');
-
-    //     $completedTasks = $allTasks->filter(function ($task) {
-    //         return $task->status === 'completed';
-    //     })->sortByDesc('due_date');
-
-    //     return view('users.account', [
-    //         'user' => $user,
-    //         'completedTasks' => $completedTasks,
-    //         // 他にも渡したい項目があればここに追加
-    //     ]);
-    // }
     public function index(Request $request)
     {
         $user = Auth::user();
