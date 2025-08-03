@@ -123,46 +123,6 @@ class TaskController extends Controller
         return redirect('/task')->with('success', 'タスクを登録しました！');
     }
 
-    // public function share(Request $request)
-    // {
-    //     $user = Auth::user();
-
-    //     // 参加順でグループを取得（created_at順に並べる）
-    //     $groups = $user->groups()->orderBy('created_at')->get();
-
-    //     // リクエストされたgroup_idを取得
-    //     $selectedGroupId = $request->input('group_id');
-
-    //     // 「グループを作る」が選択されたらリダイレクト
-    //     if ($selectedGroupId === 'create') {
-    //         return redirect()->route('group.create');
-    //     }
-
-    //     // リクエストに group_id が含まれている場合はセッションに保存
-    //     if ($selectedGroupId !== null) {
-    //         session(['selected_group_id' => $selectedGroupId]);
-    //     } else {
-    //         // リクエストに group_id がない（初回アクセスなど）の場合
-    //         $selectedGroupId = session('selected_group_id');
-
-    //         // セッションにもまだ値がない（本当の初回）の場合、最初のグループを使用
-    //         if (!$selectedGroupId && $groups->isNotEmpty()) {
-    //             $selectedGroupId = $groups->first()->id;
-    //             session(['selected_group_id' => $selectedGroupId]); // 初回に保存
-    //         }
-    //     }
-
-    //     // 有効な group_id のときだけタスク取得
-    //     $groupTasks = collect();
-    //     if ($selectedGroupId && $groups->pluck('id')->contains((int) $selectedGroupId)) {
-    //         $groupTasks = Task::where('group_id', $selectedGroupId)
-    //             ->orderBy('start_date')
-    //             ->get();
-    //     }
-
-    //     return view('task.share', compact('groups', 'selectedGroupId', 'groupTasks'));
-    // }
-
     public function share(Request $request)
     {
         $user = Auth::user();

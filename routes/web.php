@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,3 +62,15 @@ Route::get('/test',function(){
 });
 
 Route::get('/test', [App\Http\Controllers\HomeController::class, 'test'])->name('test');
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin', function () {
+        return view('admin.index');
+    })->name('admin.index');
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/account', function () {
+        return view('users.account');
+    })->name('account.settings');
+});
+Route::middleware(['auth'])->get('/account', [UserController::class, 'account'])->name('account.settings');
+
