@@ -29,3 +29,9 @@ img.account {
   margin-right: 20px;
   cursor: pointer;
 }
+
+.overlay {
+    display: none;
+    position: fixed;
+    /* 必要に応じて他のスタイル（上下中央寄せなど）も保持 */
+}

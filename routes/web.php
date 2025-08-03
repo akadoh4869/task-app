@@ -73,4 +73,5 @@ Route::middleware(['auth'])->group(function () {
     })->name('account.settings');
 });
 Route::middleware(['auth'])->get('/account', [UserController::class, 'account'])->name('account.settings');
+Route::middleware(['auth'])->get('/account', [UserController::class, 'index'])->name('account.index');
 

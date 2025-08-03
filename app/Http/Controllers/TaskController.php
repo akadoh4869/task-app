@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class TaskController extends Controller
 {
     
-   public function index(Request $request)
+    public function index(Request $request)
     {
         $user = Auth::user();
         $year = $request->input('year', 2025); // デフォルトは2025年
@@ -36,9 +36,11 @@ class TaskController extends Controller
 
         // 選択年に絞り込み（due_dateがその年 or due_dateがnullのものも常に表示）
         $filteredTasks = $allTasks->filter(function ($task) use ($year) {
-            return is_null($task->due_date) || $task->due_date->year == $year;
+            $isInYear = is_null($task->due_date) || $task->due_date->year == $year;
+            $isNotCompleted = $task->status !== 'completed';
+            return $isInYear && $isNotCompleted;
         })->sortBy(function ($task) {
-            return $task->due_date ?? now()->addYears(100); // nullは一番後ろ
+            return $task->due_date ?? now()->addYears(100);
         });
 
         return view('task.task', [
@@ -156,6 +158,7 @@ class TaskController extends Controller
         // 正当な group_id の場合のみタスク取得
         if ($selectedGroupId && $groups->pluck('id')->contains((int) $selectedGroupId)) {
             $allGroupTasks = Task::where('group_id', $selectedGroupId)
+                ->where('status', '!=', 'completed') // ← ここで完了済みを除外！
                 ->with('assignedUsers')
                 ->get();
 
