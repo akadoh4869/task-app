@@ -110,8 +110,22 @@
                                 @foreach($completedTasks as $task)
                                     <li style="margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
                                         <strong>{{ $task->task_name }}</strong><br>
-                                        期限：{{ optional($task->due_date)->format('Y-m-d') ?? '未設定' }}<br>
-                                        グループ：{{ optional($task->group)->group_name ?? '個人タスク' }}
+                                        期限：{{ optional($task->due_date)->format('Y-m-d') ?? '未設定' }}<br>                      
+                                        @if($task->group_id !== null)
+                                            グループ：{{ optional($task->group)->group_name ?? '不明' }}<br>
+                                            担当者：
+                                            @if($task->assignedUsers->isNotEmpty())
+                                                {{ $task->assignedUsers->pluck('name')->join('、') }}
+                                            @else
+                                                なし
+                                            @endif
+                                            <br>
+                                        @endif
+                                        <!-- ✅ 復元ボタン（フォーム） -->
+                                        <form method="POST" action="{{ route('tasks.restore', $task->id) }}" style="margin-top: 8px;">
+                                            @csrf
+                                            <button type="submit" class="restore-btn" style="padding: 4px 8px; font-size: 0.9em;">復元する</button>
+                                        </form>
                                     </li>
                                 @endforeach
                             </ul>
