@@ -196,8 +196,15 @@ class TaskController extends Controller
         $task->status = $request->status;
         $task->save();
 
+       // Ajax (fetch) の場合は必ず JSON + ステータス200を返す
+        if ($request->ajax()) {
+            return response()->json(['message' => 'ステータスを更新しました'], 200);
+        }
+
+        // 通常リクエスト時は元のページにリダイレクト
         return back()->with('success', 'ステータスを更新しました');
     }
+
 
     public function updateDetail(Request $request, $id)
     {
@@ -217,11 +224,61 @@ class TaskController extends Controller
         $task->due_date = $request->due_date;
         $task->save();
 
-        // 担当者更新
+        // 担当者の更新（グループタスクの場合のみ）
         $task->assignedUsers()->sync($request->assigned_user_ids ?? []);
 
-        return redirect()->back()->with('success', 'タスクを更新しました');
+        // ✅ タスクの種類に応じてリダイレクト先を分岐
+        if ($task->group_id === null) {
+            return redirect()->route('task.task')->with('success', 'タスクを更新しました');
+        } else {
+            return redirect()->route('task.share')->with('success', '共有タスクを更新しました');
+        }
     }
+
+    public function restore(Task $task)
+    {
+        $user = Auth::user();
+
+        // グループタスクは所属していればOK、個人タスクは作成 or アサインされたものだけ
+        $canRestore = false;
+
+        if ($task->group_id) {
+            // グループタスク → 所属しているグループのものなら復元OK
+            $canRestore = $user->groups->pluck('id')->contains($task->group_id);
+        } else {
+            // 個人タスク → 自分が作成者であればOK（アサインは関係なし）
+            // $canRestore = $task->user_id === $user->id;
+            $canRestore = $task->created_by == $user->id;
+        }
+
+        if ($canRestore && $task->status === 'completed') {
+            $task->status = 'in_progress'; // または未完了状態のステータス名
+            $task->save();
+            // 復元後、オーバーレイを開いた状態でアカウントページに戻る
+            return redirect()->route('account.index')->with('open_completed_overlay', true);
+        }
+
+        return redirect()->route('account.index')->with([
+        'error' => 'タスクを復元できませんでした',
+        'open_completed_overlay' => true, // オーバーレイは開いたままにする
+    ]);
+    }
+
+    public function bulkComplete(Request $request)
+    {
+        $request->validate([
+            'task_ids' => 'required|array',
+            'task_ids.*' => 'exists:tasks,id',
+        ]);
+
+        Task::whereIn('id', $request->task_ids)
+            ->update(['status' => 'completed']);
+
+        return back()->with('success', '選択されたタスクを完了に更新しました');
+    }
+
+
+
 
 
     

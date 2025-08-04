@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -74,7 +75,7 @@
                     {{ optional($task->due_date)->format('md') ?? '未設定' }}
                   </th>
                   <td class="flex2">
-                    <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
+                    <input type="checkbox" onchange="completeTask({{ $task->id }}, this)">
                     <a href="{{ route('task.detail', $task->id) }}">
                       {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
                     </a>
@@ -100,6 +101,38 @@
       </main>
     </div>
     <script src="{{ asset('js/app.js') }}"></script>
+    <script>
+      function completeTask(taskId, checkbox) {
+          setTimeout(() => {
+              fetch(`/task/${taskId}/status`, {
+                  method: 'POST', // ← PATCHではなくPOSTで送る
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                  },
+                  body: JSON.stringify({ 
+                      _method: 'PATCH', // ← LaravelがこれでPATCHとして処理
+                      status: 'completed' 
+                  })
+              })
+              .then(response => {
+                  if (response.ok) {
+                      const row = checkbox.closest('tr');
+                      if (row) row.remove();
+                  } else {
+                      alert('更新に失敗しました (status not ok)');
+                      checkbox.checked = false;
+                  }
+              })
+              .catch((err) => {
+                  alert('通信エラー: ' + err.message);
+                  checkbox.checked = false;
+              });
+          }, 1000);
+      }
+    </script>
+
+
   </body>
 
  

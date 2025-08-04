@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script src="{{ asset('js/tentative/common.js') }}"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>共有事項</title>
 </head>
 <body>
@@ -93,11 +95,11 @@
                         @foreach ($groupTasks as $task)
                             <tr class="flex2">
                                 <th>
-                                    {{ optional($task->start_date)->format('Ymd') ?? '未設定' }}〜
-                                    {{ optional($task->due_date)->format('Ymd') ?? '未設定' }}
+                                  {{ optional($task->start_date)->format('md') ?? '未設定' }}〜
+                                  {{ optional($task->due_date)->format('md') ?? '未設定' }}
                                 </th>
                                 <td class="flex2">
-                                    <input type="checkbox" id="task-{{ $task->id }}" name="todo[]" value="{{ $task->id }}" />
+                                    <input type="checkbox" onchange="completeTask({{ $task->id }}, this)">
                                     <a href="{{ route('task.detail', $task->id) }}">
                                         {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
                                     </a>
@@ -119,11 +121,40 @@
             @endif
         </div>
 
-
-
       </main>
 
   </div>
+  <script>
+    function completeTask(taskId, checkbox) {
+        setTimeout(() => {
+            fetch(`/task/${taskId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    _method: 'PATCH',
+                    status: 'completed'
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    const row = checkbox.closest('tr');
+                    if (row) row.remove();
+                } else {
+                    alert('更新に失敗しました (status not ok)');
+                    checkbox.checked = false;
+                }
+            })
+            .catch((err) => {
+                alert('通信エラー: ' + err.message);
+                checkbox.checked = false;
+            });
+        }, 1000);
+    }
+  </script>
+
     
 </body>
 </html>
