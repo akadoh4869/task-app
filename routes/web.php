@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\GroupInvitationController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -82,3 +85,12 @@ Route::post('/tasks/{task}/restore', [TaskController::class, 'restore'])->name('
 
 
 Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
+Route::post('/group/{group}/invite', [GroupController::class, 'invite'])->name('group.invite');
+
+Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
+
+
+
+
+    // routes/web.php にあるか？（絶対に api.php ではダメ）
+Route::post('/invitation/respond', [GroupController::class, 'respond'])->name('invitation.respond');
