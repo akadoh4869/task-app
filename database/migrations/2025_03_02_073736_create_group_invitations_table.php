@@ -14,11 +14,16 @@ return new class extends Migration
         Schema::create('group_invitations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('group_id')->constrained()->onDelete('cascade'); // グループID
-            $table->foreignId('invited_by')->constrained('users')->onDelete('cascade'); // 招待したユーザー
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // 招待されたユーザー
-            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending'); // 招待ステータス
+            $table->foreignId('inviter_id')->constrained('users')->onDelete('cascade'); // 招待したユーザー
+            $table->foreignId('invitee_id')->constrained('users')->onDelete('cascade'); // 招待されたユーザー
+            $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending'); // 招待ステータス
+            // 同じユーザーが同じグループに重複して招待されないように制約を追加
+            $table->unique(['group_id', 'invitee_id']);
+            $table->timestamp('responded_at')->nullable(); // ← これが必要！
             $table->timestamps();
         });
+         
+        
         
     }
 

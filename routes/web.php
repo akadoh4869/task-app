@@ -81,3 +81,4 @@ Route::middleware(['auth'])->get('/account', [UserController::class, 'index'])->
 Route::post('/tasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore');
 
 
+Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');

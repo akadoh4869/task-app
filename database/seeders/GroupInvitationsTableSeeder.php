@@ -19,8 +19,15 @@ class GroupInvitationsTableSeeder extends Seeder
         
         foreach ($users as $user) {
             DB::table('group_invitations')->insert([
-                'group_id' => $group->id, 'invited_by' => $hodaka->id, 'user_id' => $user->id, 'status' => 'accepted', 'created_at' => now(), 'updated_at' => now()
+            'group_id' => $group->id,
+            'inviter_id' => $hodaka->id,   // ← 修正
+            'invitee_id' => $user->id,     // ← 修正
+            'status' => 'accepted',
+            'created_at' => now(),
+            'updated_at' => now(),
+            'responded_at' => now(),       // ← 必要に応じて追加（nullable なので省略も可）
             ]);
         }
+
     }
 }
