@@ -31,10 +31,26 @@
             </ul>
         </header>
 
-      <main>
-        グループ作成
+        <main>
+            <div class="space-title">グループ作成</div>
 
-      </main>
+            <form action="{{ route('groups.store') }}" method="POST" class="group-create-form">
+                @csrf
+
+                <div class="form-group">
+                    <label for="group_name">グループ名</label>
+                    <input type="text" id="group_name" name="group_name" required placeholder="グループ名を入力してください">
+                    @error('name')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group center">
+                    <button type="submit" class="submit-button">作成する</button>
+                </div>
+            </form>
+        </main>
+
 
   </div>
 </body>
