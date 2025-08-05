@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/tentative/setting.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>設定</title>
 </head>
@@ -88,29 +89,29 @@
 
                        
 
-                        {{-- @if($pendingInvitations->isEmpty())
+                        @if($pendingInvitations->isEmpty())
                             <p style="text-align: center; margin-top: 50px;">保留中のグループ招待はありません。</p>
                         @else
                             <div class="invitation-list">
                                 @foreach($pendingInvitations as $invitation)
                                     <div class="invitation-card">
                                         <div class="invitation-text">
-                                            {{ $invitation->group->name }}
+                                            {{ $invitation->group->group_name }}
                                         </div>
                                         <div class="invitation-buttons">
-                                            <form action="{{ route('invitation.respond') }}" method="POST" style="display: flex; gap: 10px;">
+                                            {{-- <form action="{{ route('invitation.respond') }}" method="POST" style="display: flex; gap: 10px;">
                                                 @csrf
-                                                <input type="hidden" name="invitation_id" value="{{ $invitation->id }}">
+                                                <input type="hidden" name="invitation_id" value="{{ $invitation->id }}"> --}}
                                                 @if($totalSpaceCount < 3)
                                                     <button class="accept-btn" name="response" value="accept">参加</button>
                                                 @endif
                                                 <button class="decline-btn" name="response" value="decline">辞退</button>
-                                            </form>
+                                            {{-- </form> --}}
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
-                        @endif --}}
+                        @endif
                     </div>
                 </div>
   
