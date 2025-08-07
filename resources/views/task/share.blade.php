@@ -147,16 +147,28 @@
                       @foreach ($inviteCandidates as $candidate)
                           <li>
                               {{ $candidate->user_name }}
-                              <form method="POST" action="{{ route('group.invite', $selectedGroupId) }}" style="display:inline;">
-                                  @csrf
-                                  <input type="hidden" name="user_id" value="{{ $candidate->id }}">
-                                  <button type="submit">招待</button>
-                              </form>
+                              @if ($pendingInvitedUserIds->contains($candidate->id))
+                                  <span style="color: gray;">（招待中）</span>
+                              @else
+                                  <form method="POST" action="{{ route('group.invite', $selectedGroupId) }}" style="display:inline;">
+                                      @csrf
+                                      <input type="hidden" name="user_id" value="{{ $candidate->id }}">
+                                      <button type="submit">招待</button>
+                                  </form>
+                              @endif
                           </li>
                       @endforeach
                   </ul>
               @endif
 
+              @if ($pendingInvitedUsers->isNotEmpty())
+                  <h4>招待中のユーザー：</h4>
+                  <ul>
+                      @foreach ($pendingInvitedUsers as $invited)
+                          <li>{{ $invited->user_name }}</li>
+                      @endforeach
+                  </ul>
+              @endif
             @endif
             
           </section>
