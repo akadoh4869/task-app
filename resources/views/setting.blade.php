@@ -99,14 +99,14 @@
                                             {{ $invitation->group->group_name }}
                                         </div>
                                         <div class="invitation-buttons">
-                                            {{-- <form action="{{ route('invitation.respond') }}" method="POST" style="display: flex; gap: 10px;">
+                                            <form action="{{ route('invitation.respond') }}" method="POST" style="display: flex; gap: 10px;">
                                                 @csrf
-                                                <input type="hidden" name="invitation_id" value="{{ $invitation->id }}"> --}}
+                                                <input type="hidden" name="invitation_id" value="{{ $invitation->id }}">
                                                 @if($totalSpaceCount < 3)
                                                     <button class="accept-btn" name="response" value="accept">参加</button>
                                                 @endif
                                                 <button class="decline-btn" name="response" value="decline">辞退</button>
-                                            {{-- </form> --}}
+                                            </form>
                                         </div>
                                     </div>
                                 @endforeach

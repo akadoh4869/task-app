@@ -79,10 +79,15 @@ class GroupController extends Controller
             'response' => 'required|in:accept,decline',
         ]);
 
-        $invitation = GroupInvitation::find($request->invitation_id);
+        $invitation = GroupInvitation::findOrFail($request->invitation_id);
 
-        if ($invitation->user_id !== auth()->id()) {
+        if ($invitation->invitee_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
+        }
+
+        // すでに処理済みの場合はリダイレクト
+        if ($invitation->status !== 'pending') {
+            return redirect()->route('setting.index')->with('error', 'この招待はすでに対応済みです。');
         }
 
         if ($request->response === 'accept') {
@@ -93,15 +98,19 @@ class GroupController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
             $invitation->status = 'accepted';
+            $invitation->save(); // 保存はこの場合だけでOK
+
         } else {
-            $invitation->status = 'declined';
+            // ❗辞退時はレコード削除。save() は不要
+            $invitation->delete();
         }
 
-        $invitation->save();
-
         return redirect()->route('setting.index')->with('success', '招待への対応が完了しました。');
+
     }
+
 
 
 }
