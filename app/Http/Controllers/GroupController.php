@@ -111,6 +111,15 @@ class GroupController extends Controller
 
     }
 
+    public function leave(Request $request, Group $group)
+    {
+        $user = auth()->user();
+        $group->users()->detach($user->id); // 中間テーブルから削除
+
+        return redirect()->route('task.share')->with('success', 'グループを離脱しました。');
+    }
+
+
 
 
 }
