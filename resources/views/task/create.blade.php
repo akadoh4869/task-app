@@ -38,7 +38,7 @@
         <main>
             <section class="content active">
                 <h2 class="title">新規タスク</h2>
-                <form action="{{ route('task.store') }}" method="POST" enctype="multipart/form-data">
+                <form id="uploadForm" action="{{ route('task.store') }}" method="POST" enctype="multipart/form-data" onsubmit="event.preventDefault(); submitCompressedImages();">
                     @csrf
 
                     @php
@@ -86,7 +86,8 @@
                     <div class="flex4">
                         <div class="textarea-container">
                             <div class="create-image">
-                                <input type="file" id="image" name="image" style="display: none;">
+                                <input type="file" id="image" name="images[]" accept="image/*" multiple onchange="displayImages()" style="display: none;">
+
                                 <div id="hiddenBlock">
                                     <div class="icon-wrapper">
                                         <label for="image" class="icon-label">
@@ -94,10 +95,15 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                <!-- プレビュー表示枠 -->
+                                <div id="image-preview" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;"></div>
                             </div>
+
                             <textarea name="description" id="content" class="content" rows="5" cols="33"></textarea>
                         </div>
                     </div>
+
 
                     <br>
 
@@ -119,27 +125,128 @@
 
     <script src="./JS/app.js"></script>
     <script>
-        function displayImage() {
-            var input = document.getElementById('image');
-            var image = document.getElementById('selectedImage');
-            var hiddenBlock = document.getElementById('hiddenBlock');
+        let selectedImages = [];
 
-            // ファイルが選択されたか確認
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
+        function displayImages() {
+            const input = document.getElementById('image');
+            const preview = document.getElementById('image-preview');
+            const hiddenBlock = document.getElementById('hiddenBlock');
 
+            // ファイル選択
+            const files = Array.from(input.files);
 
-                // 画像が読み込まれた時の処理
-                reader.onload = function(e) {
-                    image.src = e.target.result;
-                    image.style.display = 'block';
-                };
-
-                // 画像を読み込む
-                reader.readAsDataURL(input.files[0]);
+            if (selectedImages.length + files.length > 5) {
+                alert('最大5枚まで選択できます');
+                input.value = ''; // クリア
+                return;
             }
 
-            hiddenBlock.style.display = "none";
+            hiddenBlock.style.display = 'none';
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '60px';
+                    img.style.height = '75px';
+                    img.style.objectFit = 'cover';
+                    img.style.border = '1px solid #ccc';
+
+                    const closeBtn = document.createElement('span');
+                    closeBtn.textContent = '×';
+                    closeBtn.style.position = 'absolute';
+                    closeBtn.style.top = '0';
+                    closeBtn.style.right = '0';
+                    closeBtn.style.cursor = 'pointer';
+                    closeBtn.style.background = '#fff';
+                    closeBtn.style.border = '1px solid #ccc';
+                    closeBtn.style.borderRadius = '50%';
+                    closeBtn.style.padding = '2px 6px';
+                    closeBtn.style.fontSize = '14px';
+                    closeBtn.style.lineHeight = '1';
+
+                    closeBtn.onclick = function() {
+                        preview.removeChild(wrapper);
+                        selectedImages = selectedImages.filter(obj => obj.name !== file.name);
+                        if (selectedImages.length === 0) {
+                            hiddenBlock.style.display = 'block';
+                        }
+                    };
+
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(closeBtn);
+                    preview.appendChild(wrapper);
+                };
+
+                reader.readAsDataURL(file);
+                selectedImages.push(file);
+            });
+
+            // 元のinputをクリア（次回のchangeイベントのため）
+            input.value = '';
+        }
+
+        // フォーム送信時に画像を圧縮して FormData に追加する例
+        function prepareCompressedImages(form) {
+            const formData = new FormData(form);
+
+            const compressAndAppend = (file, index) => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const maxWidth = 800;
+                            const scale = Math.min(maxWidth / img.width, 1);
+                            canvas.width = img.width * scale;
+                            canvas.height = img.height * scale;
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                            canvas.toBlob((blob) => {
+                                formData.append('images[]', blob, file.name);
+                                resolve();
+                            }, 'image/jpeg', 0.7); // 画質70%
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                });
+            };
+
+            return Promise.all(selectedImages.map(compressAndAppend)).then(() => formData);
+        }
+
+        function submitCompressedImages() {
+            const form = document.getElementById('uploadForm');
+            prepareCompressedImages(form).then((formData) => {
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = "/task"; // 成功後にリダイレクト
+                    } else {
+                        alert('アップロードに失敗しました');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('通信エラーが発生しました');
+                });
+            });
         }
 
         function toggleGroupSelect() {
@@ -168,11 +275,6 @@
             }
         }
     </script>
-
-    <!-- {{-- 投稿画像の表示 --}}
-                    <div>
-                        <input type="file" id="image" name="image" style="display: none;" onchange="displayImage()">
-                    </div> -->
 
 </body>
 

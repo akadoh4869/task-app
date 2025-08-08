@@ -94,3 +94,6 @@ Route::get('/setting', [SettingController::class, 'index'])->name('setting.index
 
     // routes/web.php にあるか？（絶対に api.php ではダメ）
 Route::post('/invitation/respond', [GroupController::class, 'respond'])->name('invitation.respond');
+
+// グループ離脱ルート（ユーザー本人のみアクセス可）
+Route::delete('/group/{group}/leave', [GroupController::class, 'leave'])->name('group.leave');
