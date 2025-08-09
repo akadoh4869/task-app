@@ -11,7 +11,7 @@ class Task extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'group_id', 'created_by', 'task_name', 'description', 'due_date', 'status', 'deleted_by'
+        'group_id', 'created_by', 'task_name', 'description', 'due_date', 'status', 'deleted_by','assignee_id'
     ];
 
     protected $casts = [
@@ -50,6 +50,11 @@ class Task extends Model
     public function attachments()
     {
         return $this->hasMany(TaskAttachment::class);
+    }
+
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assignee_id');
     }
 
 }

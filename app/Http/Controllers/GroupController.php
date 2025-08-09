@@ -36,6 +36,8 @@ class GroupController extends Controller
         $group->users()->attach(auth()->id(), [
             'role' => 'admin',
             'approved' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return redirect()->route('task.share', ['group_id' => $group->id])
@@ -43,7 +45,7 @@ class GroupController extends Controller
 
     }
 
-    public function invite(Request $request, $groupId)
+     public function invite(Request $request, $groupId)
     {
         $group = Group::findOrFail($groupId);
 
@@ -51,75 +53,130 @@ class GroupController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $exists = DB::table('group_invitations')
-            ->where('group_id', $groupId)
-            ->where('invitee_id', $request->user_id)
-            ->exists();
+        $inviteeId = (int) $request->user_id;
+        $inviterId = (int) Auth::id();
 
-        if (!$exists) {
-            DB::table('group_invitations')->insert([
-                'group_id' => $groupId,
-                'inviter_id' => Auth::id(),
-                'invitee_id' => $request->user_id,
-                'status' => 'pending',
-                'created_at' => now(),
-                'updated_at' => now(),
+        if ($inviteeId === $inviterId) {
+            return back()->with('error', '自分自身は招待できません。');
+        }
+
+        // すでに在籍なら招待しない
+        $alreadyMember = DB::table('group_users')
+            ->where('group_id', $groupId)
+            ->where('user_id', $inviteeId)
+            ->exists();
+        if ($alreadyMember) {
+            return back()->with('error', 'すでにグループメンバーです。');
+        }
+
+        // 既に未応答の pending があるなら touch だけ
+        $pending = GroupInvitation::where('group_id', $groupId)
+            ->where('invitee_id', $inviteeId)
+            ->where('status', 'pending')
+            ->whereNull('responded_at')
+            ->first();
+        if ($pending) {
+            $pending->touch();
+            return back()->with('success', 'すでに招待中のユーザーです（更新しました）');
+        }
+
+        // 過去の招待があれば pending に戻して再招待、無ければ新規作成
+        $existing = GroupInvitation::where('group_id', $groupId)
+            ->where('invitee_id', $inviteeId)
+            ->first();
+
+        if ($existing) {
+            $existing->update([
+                'status'       => 'pending',
+                'inviter_id'   => $inviterId,
+                'responded_at' => null,
+                'updated_at'   => now(),
+            ]);
+        } else {
+            GroupInvitation::create([
+                'group_id'   => $groupId,
+                'inviter_id' => $inviterId,
+                'invitee_id' => $inviteeId,
+                'status'     => 'pending',
             ]);
         }
 
         return back()->with('success', 'ユーザーを招待しました');
     }
 
-   
-
-    public function respond(Request $request)
+     public function respond(Request $request)
     {
         $request->validate([
             'invitation_id' => 'required|exists:group_invitations,id',
-            'response' => 'required|in:accept,decline',
+            'response'      => 'required|in:accept,decline',
         ]);
 
         $invitation = GroupInvitation::findOrFail($request->invitation_id);
-
         if ($invitation->invitee_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 
-        // すでに処理済みの場合はリダイレクト
         if ($invitation->status !== 'pending') {
             return redirect()->route('setting.index')->with('error', 'この招待はすでに対応済みです。');
         }
 
         if ($request->response === 'accept') {
-            DB::table('group_users')->insert([
-                'group_id' => $invitation->group_id,
-                'user_id' => auth()->id(),
-                'approved' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
+            // 二重挿入防止
+            $existsPivot = DB::table('group_users')
+                ->where('group_id', $invitation->group_id)
+                ->where('user_id', auth()->id())
+                ->exists();
+
+            if (!$existsPivot) {
+                DB::table('group_users')->insert([
+                    'group_id'   => $invitation->group_id,
+                    'user_id'    => auth()->id(),
+                    'approved'   => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            $invitation->update([
+                'status'       => 'accepted',
+                'responded_at' => now(),
             ]);
-
-            $invitation->status = 'accepted';
-            $invitation->save(); // 保存はこの場合だけでOK
-
         } else {
-            // ❗辞退時はレコード削除。save() は不要
+            // 履歴不要なら削除（履歴を残したい運用なら declined に更新でも可）
             $invitation->delete();
         }
 
         return redirect()->route('setting.index')->with('success', '招待への対応が完了しました。');
-
     }
 
-    public function leave(Request $request, Group $group)
+    public function leave($groupId)
     {
-        $user = auth()->user();
-        $group->users()->detach($user->id); // 中間テーブルから削除
+        $user  = Auth::user();
+        $group = Group::findOrFail($groupId);
 
-        return redirect()->route('task.share')->with('success', 'グループを離脱しました。');
+        // 1) 単独アサイン（assignee_id）を解除
+        DB::table('tasks')
+            ->where('group_id', $group->id)
+            ->where('assignee_id', $user->id)
+            ->update(['assignee_id' => null]);
+
+        // 2) 複数アサイン（pivot: task_user）からも解除 ← これを追加！
+        $taskIds = DB::table('tasks')
+            ->where('group_id', $group->id)
+            ->pluck('id');
+
+        if ($taskIds->isNotEmpty()) {
+            DB::table('task_user')
+                ->where('user_id', $user->id)
+                ->whereIn('task_id', $taskIds)
+                ->delete();
+        }
+
+        // 3) グループ脱退
+        $group->users()->detach($user->id);
+
+        return redirect()->route('task.share')
+            ->with('success', 'グループから脱退しました（担当からも外しました）');
     }
-
-
-
 
 }
