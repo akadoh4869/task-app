@@ -36,4 +36,11 @@ class Group extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function activeUsers()
+    {
+        return $this->belongsToMany(User::class, 'group_users')
+            ->withPivot('status')
+            ->wherePivot('status', '!=', 'left');
+    }
 }

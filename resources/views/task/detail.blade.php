@@ -58,46 +58,56 @@
           @endif
 
           @if ($task->group && $task->group->users->isNotEmpty())
-              {{-- 担当者の追加・削除（グループタスクのみ） --}}
-              <p>担当メンバー:</p>
-              <div id="assigned-user-list" style="display: flex; flex-wrap: wrap; gap: 15px;">
-                  @foreach ($task->assignedUsers as $user)
-                      @php
-                          $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
-                              ? asset('storage/' . $user->avatar)
-                              : asset('storage/images/default.png');
-                      @endphp
+            <p>担当メンバー:</p>
 
-                      <div class="assigned-user" style="position: relative; display: flex; align-items: center; gap: 5px; background: #f0f0f0; padding: 5px 10px; border-radius: 8px;">
-                          <img src="{{ $avatarPath }}" alt="{{ $user->user_name }}" width="30" height="30" style="border-radius: 50%;">
-                          <span>{{ $user->user_name }}</span>
-                          <input type="hidden" name="assigned_user_ids[]" value="{{ $user->id }}">
-                          <button type="button" class="remove-user" onclick="removeUser(this)">×</button>
-                      </div>
-                  @endforeach
-              </div>
+            @php
+                $assignees = $task->assignedUsers; // 多対多: task_user
+            @endphp
 
-              <br>
-              <p>メンバーを追加:</p>
-              <select id="add-user-select" onchange="addSelectedUser()">
-                  <option value="">-- メンバーを選択 --</option>
-                  @foreach ($task->group->users as $user)
-                      @if (!$task->assignedUsers->contains('id', $user->id))
-                          @php
-                              $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
-                                  ? asset('storage/' . $user->avatar)
-                                  : asset('storage/images/default.png');
-                          @endphp
+            <div id="assigned-user-list" style="display:flex; flex-wrap:wrap; gap:15px;">
+                @forelse ($assignees as $user)
+                @php
+                    $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
+                        ? asset('storage/' . $user->avatar)
+                        : asset('storage/images/default.png');
+                @endphp
 
-                          <option value="{{ $user->id }}"
-                                  data-avatar="{{ $avatarPath }}"
-                                  data-name="{{ $user->user_name }}">
-                              {{ $user->user_name }}
-                          </option>
-                      @endif
-                  @endforeach
-              </select>
-          @endif
+                <div class="assigned-user" style="position:relative; display:flex; align-items:center; gap:5px; background:#f0f0f0; padding:5px 10px; border-radius:8px;">
+                    <img src="{{ $avatarPath }}" alt="{{ $user->user_name }}" width="30" height="30" style="border-radius:50%;">
+                    <span class="assigned-name">{{ $user->user_name }}</span>
+                    <input type="hidden" name="assigned_user_ids[]" value="{{ $user->id }}">
+                    <button type="button" class="remove-user" onclick="removeUser(this)">×</button>
+                </div>
+                @empty
+                {{-- 誰もアサインされていない場合の表示 --}}
+                <div id="assigned-empty" class="muted">
+                    {{ $task->group_id ? '（担当者なし：共有）' : '（担当者なし）' }}
+                </div>
+                @endforelse
+            </div>
+
+            <br>
+
+            <p>メンバーを追加:</p>
+            <select id="add-user-select" onchange="addSelectedUser()">
+                <option value="">-- メンバーを選択 --</option>
+                @foreach ($task->group->users as $user)
+                    @if (!$assignees->contains('id', $user->id))
+                        @php
+                            $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
+                                ? asset('storage/' . $user->avatar)
+                                : asset('storage/images/default.png');
+                        @endphp
+                        <option value="{{ $user->id }}"
+                                data-avatar="{{ $avatarPath }}"
+                                data-name="{{ $user->user_name }}">
+                            {{ $user->user_name }}
+                        </option>
+                    @endif
+                @endforeach
+            </select>
+            @endif
+
 
 
           {{-- ステータス変更 --}}

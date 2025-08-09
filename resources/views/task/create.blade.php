@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
     <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>新規作成</title>
 </head>
 
@@ -231,9 +232,6 @@
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
                 })
                 .then(response => {
                     if (response.ok) {

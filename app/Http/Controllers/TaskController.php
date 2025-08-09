@@ -61,65 +61,70 @@ class TaskController extends Controller
         return view('task.create', compact('user', 'groups'));
     }
 
-    
     public function store(Request $request)
     {
         $request->validate([
-            'task_type_combined' => 'required|string', // "solo" または "group_{id}"
-            'task_name' => 'required|string|max:255',
-            'start_date' => 'nullable|date',
-            'due_date' => 'nullable|date|after_or_equal:start_date',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'task_type_combined' => 'required|string', // "personal" or "group_{id}"
+            'task_name'          => 'required|string|max:255',
+            'start_date'         => 'nullable|date',
+            'due_date'           => 'nullable|date|after_or_equal:start_date',
+            'description'        => 'nullable|string',
+            'image'              => 'nullable|image|max:2048',
+            // 主担当を1人だけ指定したい場合（任意）
+            'assignee_id'        => 'nullable|exists:users,id',
         ]);
 
         $user = Auth::user();
 
         $task = new Task();
-        $task->task_name = $request->task_name;
-        $task->start_date = $request->start_date;
-        $task->due_date = $request->due_date;
+        $task->task_name   = $request->task_name;
+        $task->start_date  = $request->start_date;
+        $task->due_date    = $request->due_date;
         $task->description = $request->description;
-        $task->created_by = $user->id;
-        $task->status = 'not_started';
+        $task->created_by  = $user->id;
+        $task->status      = 'not_started';
 
-        // 個人タスク or グループタスクの判定
+        // 個人 or グループ判定
         $typeValue = $request->task_type_combined;
 
         if ($typeValue === 'personal') {
-            $task->group_id = null;
+            // 個人タスク：グループなし、担当は自分
+            $task->group_id    = null;
+            $task->assignee_id = $user->id;
+
         } elseif (Str::startsWith($typeValue, 'group_')) {
             $groupId = (int) Str::after($typeValue, 'group_');
 
-            // 念のため、ユーザーがそのグループに属しているか確認（セキュリティ）
-            if ($user->groups->pluck('id')->contains($groupId)) {
-                $task->group_id = $groupId;
-            } else {
+            // ログインユーザーがそのグループに属しているかチェック
+            if (!$user->groups->pluck('id')->contains($groupId)) {
                 return back()->withErrors(['task_type_combined' => '不正なグループが選択されました。']);
+            }
+
+            $task->group_id = $groupId;
+
+            // 主担当（任意）：フォームで assignee_id が来ていれば採用、なければ共有（null）
+            $assigneeId = $request->input('assignee_id'); // 1人だけ
+            // ついでに「その人がグループメンバーか」を軽くチェック
+            if ($assigneeId && Group::find($groupId)?->users->pluck('id')->contains((int)$assigneeId)) {
+                $task->assignee_id = (int) $assigneeId;
+            } else {
+                $task->assignee_id = null; // 担当者なし＝共有
             }
         }
 
-        $task->save(); // タスク保存（ID確定）
+        $task->save(); // ← ここでID確定
 
-        // 担当者（assigned_user_ids[]）が送信されていたら、アサイン
-        if ($request->has('assigned_user_ids') && is_array($request->assigned_user_ids)) {
-            $task->assignedUsers()->sync($request->assigned_user_ids);
-        } else {
-            // 個人タスクの場合は作成者のみをアサイン
-            $task->assignedUsers()->attach($user->id);
-        }
-
-        // 添付ファイルがある場合
+        // 添付ファイル
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $path = $file->store('task_files', 'public');
 
             $task->attachments()->create([
-                'file_path' => $path,
+                'file_path'     => $path,
                 'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-                'type' => Str::startsWith($file->getMimeType(), 'image') ? 'image' : 'file',
+                'mime_type'     => $file->getMimeType(),
+                'file_size'     => $file->getSize(),
+                'type'          => Str::startsWith($file->getMimeType(), 'image') ? 'image' : 'file',
             ]);
         }
 
