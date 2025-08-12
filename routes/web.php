@@ -97,3 +97,16 @@ Route::post('/invitation/respond', [GroupController::class, 'respond'])->name('i
 
 // グループ離脱ルート（ユーザー本人のみアクセス可）
 Route::delete('/group/{group}/leave', [GroupController::class, 'leave'])->name('group.leave');
+ 
+Route::middleware('auth')->group(function () {
+    // 表示
+    Route::get('/users/edit', [UserController::class, 'edit'])->name('users.edit');
+
+    // 通常更新（表示名・アイコン）
+    Route::patch('/users', [UserController::class, 'update'])->name('users.update');
+
+    // 個別変更（モーダルから送信）
+    Route::patch('/users/email',    [UserController::class, 'updateEmail'])->name('users.updateEmail');
+    Route::patch('/users/username', [UserController::class, 'updateUserName'])->name('users.updateUserName');
+    Route::patch('/users/password', [UserController::class, 'updatePassword'])->name('users.updatePassword');
+});
