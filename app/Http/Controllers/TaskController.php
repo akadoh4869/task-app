@@ -52,7 +52,6 @@ class TaskController extends Controller
         ]);
     }
 
-
     public function create()
     {
         $user = Auth::user(); // ← この行を追加
@@ -63,18 +62,26 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
+        // ---- バリデーション（画像＋非画像） ----
         $request->validate([
-            'task_type_combined' => 'required|string', // "personal" or "group_{id}"
+            'task_type_combined' => 'required|string',
             'task_name'          => 'required|string|max:255',
             'start_date'         => 'nullable|date',
             'due_date'           => 'nullable|date|after_or_equal:start_date',
             'description'        => 'nullable|string',
-            'image'              => 'nullable|image|max:2048',
-            // 主担当を1人だけ指定したい場合（任意）
-            'assignee_id'        => 'nullable|exists:users,id',
+
+            // 画像（複数 & 単数の後方互換）
+            'images'   => 'nullable|array',
+            'images.*' => 'file|mimes:jpg,jpeg,png,webp,gif,bmp,svg|max:20480',
+            'image'    => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,bmp,svg|max:20480',
+
+            // 非画像（複数）
+            'files'    => 'nullable|array',
+            'files.*'  => 'file|max:51200', // 50MBなど任意
+            'assignee_id' => 'nullable|exists:users,id',
         ]);
 
-        $user = Auth::user();
+        $user = auth()->user();
 
         $task = new Task();
         $task->task_name   = $request->task_name;
@@ -84,47 +91,61 @@ class TaskController extends Controller
         $task->created_by  = $user->id;
         $task->status      = 'not_started';
 
-        // 個人 or グループ判定
+        // --- 個人 or グループ ---
         $typeValue = $request->task_type_combined;
-
         if ($typeValue === 'personal') {
-            // 個人タスク：グループなし、担当は自分
             $task->group_id    = null;
             $task->assignee_id = $user->id;
-
         } elseif (Str::startsWith($typeValue, 'group_')) {
             $groupId = (int) Str::after($typeValue, 'group_');
-
-            // ログインユーザーがそのグループに属しているかチェック
             if (!$user->groups->pluck('id')->contains($groupId)) {
                 return back()->withErrors(['task_type_combined' => '不正なグループが選択されました。']);
             }
-
             $task->group_id = $groupId;
-
-            // 主担当（任意）：フォームで assignee_id が来ていれば採用、なければ共有（null）
-            $assigneeId = $request->input('assignee_id'); // 1人だけ
-            // ついでに「その人がグループメンバーか」を軽くチェック
-            if ($assigneeId && Group::find($groupId)?->users->pluck('id')->contains((int)$assigneeId)) {
-                $task->assignee_id = (int) $assigneeId;
-            } else {
-                $task->assignee_id = null; // 担当者なし＝共有
-            }
+            $assigneeId = $request->input('assignee_id');
+            $task->assignee_id = ($assigneeId && Group::find($groupId)?->users->pluck('id')->contains((int)$assigneeId))
+                ? (int) $assigneeId : null;
         }
 
-        $task->save(); // ← ここでID確定
+        $task->save(); // ← ID確定
 
-        // 添付ファイル
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $path = $file->store('task_files', 'public');
+        // ---- ここからアップロード保存（合計5件まで） ----
+        // 1) フロントから来たファイル配列を取り出し
+        $images = $request->file('images', []);
+        if ($request->hasFile('image')) { $images[] = $request->file('image'); } // 単数互換
+        $others = $request->file('files', []);
 
+        // 2) 合計上限チェック（サーバ側でも担保）
+        $total = count($images) + count($others);
+        if ($total > 5) {
+            // 超過分は切り捨てる or バリデーションエラーにする（ここでは切り捨て）
+            $keepImages = min(count($images), 5);
+            $images = array_slice($images, 0, $keepImages);
+            $others = array_slice($others, 0, 5 - $keepImages);
+        }
+
+        // 3) 画像保存
+        foreach ($images as $file) {
+            $path = $file->store('task_files', 'public'); // storage/app/public/task_files/...
             $task->attachments()->create([
                 'file_path'     => $path,
-                'original_name' => $file->getClientOriginalName(),
-                'mime_type'     => $file->getMimeType(),
+                'original_name' => $file->getClientOriginalName() ?? $file->hashName(),
+                'mime_type'     => $file->getClientMimeType(),
                 'file_size'     => $file->getSize(),
-                'type'          => Str::startsWith($file->getMimeType(), 'image') ? 'image' : 'file',
+                'type'          => 'image',
+                // 'sort_order'  => 任意
+            ]);
+        }
+
+        // 4) 非画像保存
+        foreach ($others as $file) {
+            $path = $file->store('task_files', 'public');
+            $task->attachments()->create([
+                'file_path'     => $path,
+                'original_name' => $file->getClientOriginalName() ?? $file->hashName(),
+                'mime_type'     => $file->getClientMimeType(),
+                'file_size'     => $file->getSize(),
+                'type'          => 'file',
             ]);
         }
 

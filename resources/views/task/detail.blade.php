@@ -126,44 +126,69 @@
           <button type="submit">更新</button>
       </form>
 
-        @if ($task->attachments->isNotEmpty())
-            <h3>添付ファイル:</h3>
-            <ul style="display: flex; gap: 20px; flex-wrap: wrap;">
-                @foreach ($task->attachments as $file)
-                    <li style="list-style: none; text-align: center;">
-                        <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank" class="tooltip-wrapper">
-                            @php
-                                $isImage = Str::startsWith($file->mime_type, 'image');
-                                $ext = pathinfo($file->original_name, PATHINFO_EXTENSION);
-                                $icon = match(strtolower($ext)) {
-                                    'pdf' => 'pdf-icon.png',
-                                    'xls', 'xlsx' => 'excel-icon.png',
-                                    'ppt', 'pptx' => 'ppt-icon.png',
-                                    default => 'file-icon.png',
-                                };
-                            @endphp
+         @php
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+@endphp
 
-                            @if ($isImage)
-                                <img src="{{ asset('storage/' . $file->file_path) }}" alt="画像" width="60" height="75"
-                                    style="object-fit: cover; border: 1px solid #ccc;">
-                            @else
-                                <img src="{{ asset('icons/' . $icon) }}" alt="ファイル" width="64" height="64"><br>
+@if ($task->attachments->isNotEmpty())
+  <h3>添付ファイル:</h3>
 
-                                <span class="tooltip-text">{{ $file->original_name }}</span>
+  <ul class="attach-strip">
+    @foreach ($task->attachments as $file)
+      @php
+        $raw  = $file->file_path ?? '';
+        $url  = Str::startsWith($raw, ['http://','https://'])
+                 ? $raw
+                 : (Str::startsWith($raw, ['storage/','/storage/']) ? asset(ltrim($raw,'/')) : Storage::url($raw));
 
-                                <span style="display: block;
-                                    max-width: 100px;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                    white-space: nowrap;">
-                                    {{ $file->original_name }}
-                                </span>
-                            @endif
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
+        $name = $file->original_name ?: basename($raw);
+        $mime = $file->mime_type ?? '';
+        $isImage = Str::startsWith($mime, 'image') || preg_match('/\.(jpe?g|png|gif|webp|bmp|svg)$/i', $raw);
+        $isPdf   = Str::startsWith($mime, 'application/pdf') || preg_match('/\.pdf$/i', $raw);
+
+        $ext  = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        $iconMap = [
+          'pdf'=>'fa-file-pdf','doc'=>'fa-file-word','docx'=>'fa-file-word',
+          'xls'=>'fa-file-excel','xlsx'=>'fa-file-excel','csv'=>'fa-file-excel',
+          'ppt'=>'fa-file-powerpoint','pptx'=>'fa-file-powerpoint',
+          'zip'=>'fa-file-zipper','rar'=>'fa-file-zipper','7z'=>'fa-file-zipper',
+        ];
+        $iconClass = $iconMap[$ext] ?? ($isImage ? 'fa-image' : 'fa-file');
+      @endphp
+
+      <li>
+        <a
+          href="{{ $url }}"
+          class="attach-tile"
+          data-url="{{ $url }}"
+          data-kind="{{ $isImage ? 'image' : ($isPdf ? 'pdf' : 'other') }}"
+          aria-label="{{ $name }}"
+          title="{{ $name }}"
+        >
+          <div class="tile-box">
+            @if ($isImage)
+              <img src="{{ $url }}" alt="">
+            @else
+              <div class="icon-60x75"><i class="fa-solid {{ $iconClass }}" aria-hidden="true"></i></div>
+            @endif
+          </div>
+          <span class="tt">{{ $name }}</span>
+        </a>
+      </li>
+    @endforeach
+  </ul>
+
+  {{-- 画像/PDF プレビュー用モーダル --}}
+  <div id="viewer-modal" class="viewer hidden" aria-hidden="true">
+    <div class="viewer__backdrop" data-close="1"></div>
+    <div class="viewer__body">
+      <button type="button" class="viewer__close" data-close="1">×</button>
+      <div id="viewer-content"></div>
+    </div>
+  </div>
+@endif
+
 
       
 
@@ -174,3 +199,51 @@
     
 </body>
 </html>
+<script>
+  // 画像とPDFはモーダルで開く。それ以外はデフォルト遷移（新規タブにしたければ target="_blank" を付ける）
+  document.addEventListener('click', function(e){
+    const a = e.target.closest('.attach-tile');
+    if (!a) return;
+
+    const kind = a.getAttribute('data-kind');
+    const url  = a.getAttribute('data-url');
+
+    if (kind === 'image' || kind === 'pdf') {
+      e.preventDefault();
+      openViewer(kind, url);
+    }
+  });
+
+  const modal = document.getElementById('viewer-modal');
+  const content = document.getElementById('viewer-content');
+
+  function openViewer(kind, url){
+    // 中身を入れ替え
+    content.innerHTML = '';
+    if (kind === 'image') {
+      const img = new Image();
+      img.src = url;
+      content.appendChild(img);
+    } else if (kind === 'pdf') {
+      // ブラウザのPDFビューワで表示
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      content.appendChild(iframe);
+    }
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeViewer(){
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    content.innerHTML = '';
+  }
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target.dataset.close === '1') closeViewer();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeViewer();
+  });
+</script>
