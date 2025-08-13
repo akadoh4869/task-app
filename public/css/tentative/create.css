@@ -1,0 +1,6 @@
+#hiddenBlock { display: inline-block; }
+#image-preview { display:flex; flex-wrap:wrap; gap:10px; }
+#hiddenBlock .icon-label{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:60px; height:75px; border:1px dashed #aaa; cursor:pointer;
+}
