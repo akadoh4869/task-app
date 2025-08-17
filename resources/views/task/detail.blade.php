@@ -118,6 +118,69 @@
               <option value="completed" {{ $task->status === 'completed' ? 'selected' : '' }}>完了</option>
           </select>
 
+            @php
+                use Illuminate\Support\Facades\Storage;
+                use Illuminate\Support\Str;
+            @endphp
+
+            @if ($task->attachments->isNotEmpty())
+                <p>添付ファイル:</p>
+
+                <ul class="attach-strip">
+                    @foreach ($task->attachments as $file)
+                    @php
+                        $raw  = $file->file_path ?? '';
+                        $url  = Str::startsWith($raw, ['http://','https://'])
+                                ? $raw
+                                : (Str::startsWith($raw, ['storage/','/storage/']) ? asset(ltrim($raw,'/')) : Storage::url($raw));
+
+                        $name = $file->original_name ?: basename($raw);
+                        $mime = $file->mime_type ?? '';
+                        $isImage = Str::startsWith($mime, 'image') || preg_match('/\.(jpe?g|png|gif|webp|bmp|svg)$/i', $raw);
+                        $isPdf   = Str::startsWith($mime, 'application/pdf') || preg_match('/\.pdf$/i', $raw);
+
+                        $ext  = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                        $iconMap = [
+                        'pdf'=>'fa-file-pdf','doc'=>'fa-file-word','docx'=>'fa-file-word',
+                        'xls'=>'fa-file-excel','xlsx'=>'fa-file-excel','csv'=>'fa-file-excel',
+                        'ppt'=>'fa-file-powerpoint','pptx'=>'fa-file-powerpoint',
+                        'zip'=>'fa-file-zipper','rar'=>'fa-file-zipper','7z'=>'fa-file-zipper',
+                        ];
+                        $iconClass = $iconMap[$ext] ?? ($isImage ? 'fa-image' : 'fa-file');
+                    @endphp
+
+                    <li>
+                        <a
+                        href="{{ $url }}"
+                        class="attach-tile"
+                        data-url="{{ $url }}"
+                        data-kind="{{ $isImage ? 'image' : ($isPdf ? 'pdf' : 'other') }}"
+                        aria-label="{{ $name }}"
+                        title="{{ $name }}"
+                        >
+                        <div class="tile-box">
+                            @if ($isImage)
+                            <img src="{{ $url }}" alt="">
+                            @else
+                            <div class="icon-60x75"><i class="fa-solid {{ $iconClass }}" aria-hidden="true"></i></div>
+                            @endif
+                        </div>
+                        <span class="tt">{{ $name }}</span>
+                        </a>
+                    </li>
+                    @endforeach
+                </ul>
+
+                {{-- 画像/PDF プレビュー用モーダル --}}
+                <div id="viewer-modal" class="viewer hidden" aria-hidden="true">
+                    <div class="viewer__backdrop" data-close="1"></div>
+                    <div class="viewer__body">
+                    <button type="button" class="viewer__close" data-close="1">×</button>
+                    <div id="viewer-content"></div>
+                    </div>
+                </div>
+            @endif
+
           {{-- 詳細編集 --}}
           <p>詳細:</p>
           <textarea name="description" rows="5" style="width: 100%;">{{ $task->description }}</textarea>
@@ -126,77 +189,12 @@
           <button type="submit">更新</button>
       </form>
 
-         @php
-    use Illuminate\Support\Facades\Storage;
-    use Illuminate\Support\Str;
-@endphp
-
-@if ($task->attachments->isNotEmpty())
-  <h3>添付ファイル:</h3>
-
-  <ul class="attach-strip">
-    @foreach ($task->attachments as $file)
-      @php
-        $raw  = $file->file_path ?? '';
-        $url  = Str::startsWith($raw, ['http://','https://'])
-                 ? $raw
-                 : (Str::startsWith($raw, ['storage/','/storage/']) ? asset(ltrim($raw,'/')) : Storage::url($raw));
-
-        $name = $file->original_name ?: basename($raw);
-        $mime = $file->mime_type ?? '';
-        $isImage = Str::startsWith($mime, 'image') || preg_match('/\.(jpe?g|png|gif|webp|bmp|svg)$/i', $raw);
-        $isPdf   = Str::startsWith($mime, 'application/pdf') || preg_match('/\.pdf$/i', $raw);
-
-        $ext  = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        $iconMap = [
-          'pdf'=>'fa-file-pdf','doc'=>'fa-file-word','docx'=>'fa-file-word',
-          'xls'=>'fa-file-excel','xlsx'=>'fa-file-excel','csv'=>'fa-file-excel',
-          'ppt'=>'fa-file-powerpoint','pptx'=>'fa-file-powerpoint',
-          'zip'=>'fa-file-zipper','rar'=>'fa-file-zipper','7z'=>'fa-file-zipper',
-        ];
-        $iconClass = $iconMap[$ext] ?? ($isImage ? 'fa-image' : 'fa-file');
-      @endphp
-
-      <li>
-        <a
-          href="{{ $url }}"
-          class="attach-tile"
-          data-url="{{ $url }}"
-          data-kind="{{ $isImage ? 'image' : ($isPdf ? 'pdf' : 'other') }}"
-          aria-label="{{ $name }}"
-          title="{{ $name }}"
-        >
-          <div class="tile-box">
-            @if ($isImage)
-              <img src="{{ $url }}" alt="">
-            @else
-              <div class="icon-60x75"><i class="fa-solid {{ $iconClass }}" aria-hidden="true"></i></div>
-            @endif
-          </div>
-          <span class="tt">{{ $name }}</span>
-        </a>
-      </li>
-    @endforeach
-  </ul>
-
-  {{-- 画像/PDF プレビュー用モーダル --}}
-  <div id="viewer-modal" class="viewer hidden" aria-hidden="true">
-    <div class="viewer__backdrop" data-close="1"></div>
-    <div class="viewer__body">
-      <button type="button" class="viewer__close" data-close="1">×</button>
-      <div id="viewer-content"></div>
-    </div>
-  </div>
-@endif
-
-
-      
+        
 
     </main>
 
   </div>
-    
-    
+      
 </body>
 </html>
 <script>
