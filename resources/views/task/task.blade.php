@@ -9,6 +9,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
     <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
+    @php
+    use Carbon\Carbon;
+
+    // コントローラから $year を受け取っている前提
+    $startDate = Carbon::create($year, 1, 1);
+    $endDate   = $startDate->copy()->endOfYear();
+    $days      = $startDate->diffInDays($endDate) + 1; // 365 or 366
+    @endphp
+
+    <script>
+      window.taskCalendar = {
+        startDate: "{{ $startDate->format('Y-m-d') }}",
+        endDate: "{{ $endDate->format('Y-m-d') }}",
+        days: {{ $days }}
+      };
+    </script>
     <script src="{{ asset('js/tentative/common.js') }}"></script>
     <title>タスク管理ページ</title>
   </head>
@@ -21,9 +37,9 @@
 
         <!--メニューバー-->
         <ul>
-          <li><a href="/task">タスク管理</a></li>
-          <li><a href="/create">作成</a></li>
-          <li><a href="/task/share">共有事項</a></li>
+          <li><a href="/task">タスク一覧</a></li>
+          <li><a href="/create">新規作成</a></li>
+          <li><a href="/task/share">グループ別</a></li>
           <li><a href="/setting">設定</a></li>
           <li>
             <a href="#">
@@ -90,12 +106,72 @@
               @endif
             </table>
           </section>
-        
 
           <section id="content-calendar" class="content">
-            <p>カレンダー表示エリア</p>
+            <div class="gantt-wrapper">
 
+              <div class="gantt-header">
+                <div class="gantt-task-col">タスク名</div>
+                <div class="gantt-timeline">
+
+                  {{-- 月ラベル行 --}}
+                  <div class="gantt-month-row">
+                    @php
+                      $prevMonth = null;
+                      $start = $startDate->copy();
+                      $end = $endDate->copy();
+                    @endphp
+
+                    @while ($start->lte($end))
+                      @php
+                        $monthStart = $start->copy()->startOfMonth();
+                        $monthEnd = $start->copy()->endOfMonth();
+                        $daysInMonth = $monthEnd->diffInDays($monthStart) + 1;
+                      @endphp
+                      <div class="gantt-month" style="width: calc(var(--day-width) * {{ $daysInMonth }})">
+                        {{ $start->format('n月') }}
+                      </div>
+                      @php $start->addMonth(); @endphp
+                    @endwhile
+                  </div>
+
+                  {{-- 日付ラベル行 --}}
+                  <div class="gantt-day-row">
+                    @php $d = $startDate->copy(); @endphp
+                    @while ($d->lte($endDate))
+                      <div class="gantt-day">
+                        <span class="day-label">{{ $d->format('j') }}</span>
+                      </div>
+                      @php $d->addDay(); @endphp
+                    @endwhile
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="gantt-body">
+                @foreach($allPersonalTasks as $task)
+                  <div class="gantt-row">
+                    <div class="gantt-task-col">{{ $task->task_name }}</div>
+                    <div class="gantt-timeline">
+                      @if ($task->start_date && $task->due_date)
+                        @php $isOverdue = $task->due_date->isPast(); @endphp
+                        <div class="gantt-bar"
+                            data-start="{{ $task->start_date->format('Y-m-d') }}"
+                            data-end="{{ $task->due_date->format('Y-m-d') }}"
+                            data-overdue="{{ $isOverdue ? '1' : '0' }}">
+                          <span class="gantt-label">{{ $task->task_name }}</span>
+                        </div>
+                      @else
+                        <span class="no-date"></span>
+                      @endif
+                    </div>
+                  </div>
+                @endforeach
+              </div>
+            </div>
           </section>
+
         </div>
 
       </main>
