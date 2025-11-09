@@ -96,54 +96,59 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-   // 📆 ガントチャート初期表示を「今日」に合わせる
-window.addEventListener('load', () => {
-  if (!window.taskCalendar) return;
+  // ----------------------------
+// ▼ 今日の列へスクロール（修正版）
+// ----------------------------
 
-  const wrapper = document.querySelector('.gantt-wrapper');
-  if (!wrapper) return;
 
-  const parseYmd = (ymd) => {
-    const [y, m, d] = ymd.split('-').map(Number);
-    return new Date(y, m - 1, d);
-  };
-
-  const startDate = parseYmd(window.taskCalendar.startDate);
-  const endDate   = parseYmd(window.taskCalendar.endDate);
-
+// ----------------------------
+// 🎯 今日の日付列に自動スクロール（全行対応）
+// ----------------------------
+const wrapper = document.querySelector('.gantt-wrapper');
+if (wrapper && window.taskCalendar) {
+  const calendarYear = parseInt(window.taskCalendar.startDate.slice(0, 4), 10);
   const today = new Date();
-  // 今年の範囲外なら何もしない
-  if (today < startDate || today > endDate) return;
+  const todayYear = today.getFullYear();
 
-  const oneDay = 24 * 60 * 60 * 1000;
-  const diffDays = Math.floor(
-    (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
-     Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
-    ) / oneDay
-  );
+  if (calendarYear === todayYear) {
+    const todayStr = today.toISOString().slice(0, 10);
 
-  // 1日分の幅を .gantt-day-row から取得（grid-auto-columns: 32px 前提）
-  let dayWidth = 32;
-  const dayRow = wrapper.querySelector('.gantt-day-row');
-  if (dayRow) {
-    const styles = getComputedStyle(dayRow);
-    const v = styles.gridAutoColumns || styles.getPropertyValue('grid-auto-columns');
-    const n = parseFloat(v);
-    if (!isNaN(n) && n > 0) dayWidth = n;
+    // gantt-body 内のすべての .gantt-day を取得して、
+    // 最初に見つかった今日の日付セルを使う
+    const allDays = wrapper.querySelectorAll(`.gantt-body .gantt-day[data-date="${todayStr}"]`);
+    const todayCell = allDays.length > 0 ? allDays[0] : null;
+
+    if (todayCell) {
+      todayCell.classList.add('today');
+
+      // レイアウトが確定したあとにスクロール
+      requestAnimationFrame(() => {
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const cellRect = todayCell.getBoundingClientRect();
+        const currentScroll = wrapper.scrollLeft;
+
+        // 今日のセルの中央位置
+        const cellCenter =
+          (cellRect.left - wrapperRect.left) + currentScroll + (todayCell.offsetWidth / 2);
+
+        // 中央付近に来るように調整
+        let target = cellCenter - (wrapper.clientWidth / 2);
+
+        // はみ出し防止
+        if (target < 0) target = 0;
+        const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+        if (target > maxScroll) target = maxScroll;
+
+        wrapper.scrollLeft = target;
+
+        console.log('✅ 今日の位置へスクロール:', todayStr, target);
+      });
+    } else {
+      console.warn('⚠️ gantt-body 内に今日のセルが見つかりません:', todayStr);
+    }
   }
+}
 
-  // 今日が少し左よりに見えるように2日分引いておく
-  const target = Math.max(0, dayWidth * (diffDays - 2));
-
-  // レイアウト確定後に1回だけ適用（アニメーションなし）
-  requestAnimationFrame(() => {
-    wrapper.scrollLeft = target;
-    console.log(`今日(${today.toLocaleDateString()}) の位置まで ${target}px セット`, {
-      scrollWidth: wrapper.scrollWidth,
-      clientWidth: wrapper.clientWidth,
-    });
-  });
-});
 
 
 }
