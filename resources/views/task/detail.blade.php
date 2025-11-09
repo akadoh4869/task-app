@@ -20,9 +20,9 @@
 
         <!--メニューバー-->
         <ul>
-          <li><a href="/task">タスク管理</a></li>
-          <li><a href="/create">作成</a></li>
-          <li><a href="/task/share">共有事項</a></li>
+          <li><a href="/task">タスク一覧</a></li>
+          <li><a href="/create">新規作成</a></li>
+          <li><a href="/task/share">グループ別</a></li>
           <li><a href="/setting">設定</a></li>
           <li>
             <a href="#">
