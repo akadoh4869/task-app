@@ -48,6 +48,7 @@ img.account {
   position: relative;
   --day-width: 32px;     /* 1日あたりの幅 */
   background: #fff; /* ✅ 薄いグレーをやめて真っ白に */
+  scroll-behavior: smooth;
   /* width: 100%;    */
 
 }

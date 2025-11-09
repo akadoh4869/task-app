@@ -110,6 +110,9 @@
           <section id="content-calendar" class="content">
             <div class="gantt-wrapper">
 
+              {{-- =========================
+                  ヘッダー部
+              ========================== --}}
               <div class="gantt-header">
                 <div class="gantt-task-col">タスク名</div>
                 <div class="gantt-timeline">
@@ -139,7 +142,7 @@
                   <div class="gantt-day-row">
                     @php $d = $startDate->copy(); @endphp
                     @while ($d->lte($endDate))
-                      <div class="gantt-day">
+                      <div class="gantt-day" data-date="{{ $d->format('Y-m-d') }}">
                         <span class="day-label">{{ $d->format('j') }}</span>
                       </div>
                       @php $d->addDay(); @endphp
@@ -149,11 +152,23 @@
                 </div>
               </div>
 
+              {{-- =========================
+                  ボディ部
+              ========================== --}}
               <div class="gantt-body">
                 @foreach($allPersonalTasks as $task)
                   <div class="gantt-row">
                     <div class="gantt-task-col">{{ $task->task_name }}</div>
                     <div class="gantt-timeline">
+
+                      {{-- 📅 各タスク行にも日付セルを生成（透明背景） --}}
+                      @php $d = $startDate->copy(); @endphp
+                      @while ($d->lte($endDate))
+                        <div class="gantt-day" data-date="{{ $d->format('Y-m-d') }}"></div>
+                        @php $d->addDay(); @endphp
+                      @endwhile
+
+                      {{-- 📊 タスクバー --}}
                       @if ($task->start_date && $task->due_date)
                         @php $isOverdue = $task->due_date->isPast(); @endphp
                         <div class="gantt-bar"
@@ -165,12 +180,14 @@
                       @else
                         <span class="no-date"></span>
                       @endif
+
                     </div>
                   </div>
                 @endforeach
               </div>
             </div>
           </section>
+
 
         </div>
 
