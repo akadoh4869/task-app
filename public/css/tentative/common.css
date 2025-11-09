@@ -1,17 +1,75 @@
+/* header部分 */
+.flex,.menu {
+  padding: 0%;
+  margin: 0%;
+}
+
+/* // 🟩 透明な「hover検知ゾーン」を設置 */
+.sidebar-hover-zone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25px; 
+  height: 100%;
+  z-index: 10;
+}
+
+.menu li a span {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-100px); 
+    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); 
+  }
+
+  /* // 🟦 左端（hover zone）にマウスが入ったときだけ文字を表示 */
+  .sidebar-hover-zone:hover ~ .menu li a span,
+  .menu:hover li a span {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+.logo > a > img {
+    width: 45px;
+    height: auto;
+    margin: 30px 0;
+    transition: all 0.3s ease;
+  }
+
+li > a > img.account {
+  width: 25px;
+  height: 25px;
+  margin: 30px 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+li{
+  width: 200px;
+}
+
+.fa-solid{
+  font-size: 25px;
+  padding-right: 15px;
+}
+span{
+  font-size: 20px;
+  
+}
+
+li > a:hover{
+  background-color: #999;
+  border-radius: 10px;
+  padding: 1px 10px;
+}
+
+/* main部分 */
 .year {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
 }
-
-img.account {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 
 .content {
   display: none;
@@ -48,8 +106,8 @@ img.account {
   position: relative;
   --day-width: 32px;     /* 1日あたりの幅 */
   background: #fff; /* ✅ 薄いグレーをやめて真っ白に */
-  scroll-behavior: smooth;
-  /* width: 100%;    */
+  /* scroll-behavior: smooth; */
+  width: 100%;   
 
 }
   
@@ -63,7 +121,8 @@ img.account {
   border-bottom: 1px solid #ddd;
   background: #f5f5f5;
   position: relative;
-  width: max-content; /* ← 横スクロール範囲に合わせる */
+  width: max-content; 
+  /* width: calc(var(--day-width) * 365 + 180px); タスク列180px + 日数分 */
 }
 
 /* タスク名列 */
@@ -126,7 +185,8 @@ img.account {
 .gantt-body {
   position: relative;
   background: #fff;
-  width: max-content; /* ← 横幅を合わせる */
+  width: max-content;
+  /* width: calc(var(--day-width) * 365 + 180px); タスク列180px + 日数分 */
 }
 
 .gantt-row {
@@ -226,6 +286,7 @@ img.account {
 
 .gantt-label {
   pointer-events: none;
+  font-size: 13px;
 }
 
 /* 日付未設定用 */
