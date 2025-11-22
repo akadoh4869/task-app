@@ -44,7 +44,7 @@
           <li><a href="/setting"><i class="fa-solid fa-gear"></i><span>設定</span></a></li>
           <li>
             <a href="#">
-              <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント" class="account">
+              <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント">
               <span>プロフィール</span>
             </a>
           </li>
