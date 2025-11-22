@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
   <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/tentative/setting.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
@@ -30,7 +31,7 @@
           <li><a href="/setting"><i class="fa-solid fa-gear"></i><span>設定</span></a></li>
           <li>
             <a href="#">
-              <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント" class="account">
+              <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント">
               <span>プロフィール</span>
             </a>
           </li>

@@ -1,6 +1,6 @@
 /* main部分 */
-main{
-  z-index: 0;
+.t-head{
+    width:100%;
 }
 
 .year {
