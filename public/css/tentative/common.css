@@ -4,42 +4,55 @@
   margin: 0%;
 }
 
-/* // 🟩 透明な「hover検知ゾーン」を設置 */
-.sidebar-hover-zone {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100px; 
-  height: 100%;
-  z-index: 10;
+.sidebar{
+  width: 300px;
+  z-index: 5;
 }
 
-.menu li a span {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(-100px); 
-    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); 
-  }
 
-  /* // 🟦 左端（hover zone）にマウスが入ったときだけ文字を表示 */
-  .sidebar-hover-zone:hover ~ .menu li a span,
-  .menu:hover li a span {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
-  }
+/* // 🟩 透明な「hover検知ゾーン」を設置 */
+.sidebar-hover-zone {
+  width: 300px; 
+  height: 100%;
+}
 
 .logo > a > img {
-    width: 45px;
-    height: auto;
-    margin: 30px 0;
-    transition: all 0.3s ease;
-  }
+  width: 45px;
+  height: auto;
+  margin: 30px 0;
+  transition: all 0.3s ease;
+}
 
-li > a > img {
+/* // 🟦 左端（hover zone）にマウスが入ったときだけ文字を表示 */
+.sidebar-hover-zone:hover ~ .menu li a span,
+.menu:hover li a span {
+  opacity: 1;
+  visibility: visible; 
+  
+  
+}
+
+.menu > li > a > span{
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); 
+  
+}
+
+li a:hover{
+  display: flex;
+  align-items: center;
+  background-color: #ddd;
+  border-radius: 10px;
+  padding: 10px 15px;
+
+
+}
+
+li > img {
   width: 35px;
   height: 35px;
-  margin: 30px 0;
+  /* margin: 30px 0; */
   border-radius: 50%;
   object-fit: cover;
 }
@@ -58,9 +71,5 @@ span{
   
 }
 
-li:hover{
-  background-color: #ddd;
-  border-radius: 10px;
-  padding: 1px 10px;
-}
+
 
