@@ -54,19 +54,25 @@
 <div class="flex">
 
     <!-- ヘッダー -->
-    <header>
-        <h1 class="appname">Task Me</h1>
-        <ul>
-            <li><a href="/task">タスク管理</a></li>
-            <li><a href="/create">作成</a></li>
-            <li><a href="/task/share">共有事項</a></li>
-            <li><a href="/setting">設定</a></li>
-            <li>
-                <a href="#">
-                    <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}"
-                         alt="アカウント" class="account">
-                </a>
-            </li>
+    <header class="sidebar">
+        <div class="sidebar-hover-zone"></div> <!-- ← 透明エリア追加 -->
+        <div class="logo">
+          <a href="/task">
+            <img src="{{ asset('images/logo/logo2.png') }}" alt="Task Me ロゴ">
+          </a>
+        </div>
+
+        <ul class="menu">
+          <li><a href="/task"><i class="fa-solid fa-list-check"></i><span>タスク一覧</span></a></li>
+          <li><a href="/create"><i class="fa-solid fa-plus"></i><span>新規作成</span></a></li>
+          <li><a href="/task/share"><i class="fa-solid fa-user-group"></i><span>グループ別</span></a></li>
+          <li><a href="/setting"><i class="fa-solid fa-gear"></i><span>設定</span></a></li>
+          <li>
+            <a href="#">
+              <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント" class="account">
+              <span>プロフィール</span>
+            </a>
+          </li>
         </ul>
     </header>
 

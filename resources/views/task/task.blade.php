@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('css/tentative/task.css')}}"/>
     <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
     @php
     use Carbon\Carbon;
@@ -84,7 +85,9 @@
           </div>
         </section>
 
+       
         <div class="tab-container">
+           {{-- リストの内容 --}}
           <section id="content-list" class="content active">
             <table>
               @foreach ($allPersonalTasks as $task)
@@ -110,6 +113,7 @@
             </table>
           </section>
 
+          {{-- カレンダー --}}
           <section id="content-calendar" class="content">
             <div class="gantt-wrapper">
 
