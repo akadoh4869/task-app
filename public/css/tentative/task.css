@@ -1,14 +1,13 @@
 /* main部分 */
-.t-head{
-    width:100%;
+.t-head {
+  width: 100%;
+  /* 必要なら少しだけ上に余白 */
+  margin-top: 10px;  /* なくてもOK */
 }
 
 .year {
   display: flex;
-  /* align-items: left;
-  justify-content: left; */
-  /* margin-left: -10%; */
-  margin-top: 5%;
+  margin-top: 0;      /* ← ここを 0 や 5〜10px などに */
   gap: 20px;
 }
 

@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@2.0.0/modern-normalize.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
     <link rel="stylesheet" href="{{ asset('css/tentative/task.css')}}"/>
@@ -44,13 +45,8 @@
           <li><a href="/task"><i class="fa-solid fa-list-check"></i><span>タスク一覧</span></a></li>
           <li><a href="/create"><i class="fa-solid fa-plus"></i><span>新規作成</span></a></li>
           <li><a href="/task/share"><i class="fa-solid fa-user-group"></i><span>グループ別</span></a></li>
-          <li><a href="/setting"><i class="fa-solid fa-gear"></i><span>設定</span></a></li>
-          <li>
-            <a href="#">
-              <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント">
-              <span>プロフィール</span>
-            </a>
-          </li>
+          <li><a href="/setting"><i class="fa-solid fa-gear"></i><span>設定ああ</span></a></li>
+          <li><img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント">{{-- <span>プロフィール</span> --}}</li>
         </ul>
       </header>
 

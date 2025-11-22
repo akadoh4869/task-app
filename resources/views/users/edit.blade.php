@@ -54,7 +54,7 @@
 <div class="flex">
 
     <!-- ヘッダー -->
-    <header class="sidebar">
+   <header class="sidebar">
         <div class="sidebar-hover-zone"></div> <!-- ← 透明エリア追加 -->
         <div class="logo">
           <a href="/task">
@@ -66,15 +66,10 @@
           <li><a href="/task"><i class="fa-solid fa-list-check"></i><span>タスク一覧</span></a></li>
           <li><a href="/create"><i class="fa-solid fa-plus"></i><span>新規作成</span></a></li>
           <li><a href="/task/share"><i class="fa-solid fa-user-group"></i><span>グループ別</span></a></li>
-          <li><a href="/setting"><i class="fa-solid fa-gear"></i><span>設定</span></a></li>
-          <li>
-            <a href="#">
-              <img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント">
-              <span>プロフィール</span>
-            </a>
-          </li>
+          <li><a href="/setting"><i class="fa-solid fa-gear"></i><span>設定ああ</span></a></li>
+          <li><img src="{{ asset(Auth::user()->avatar ? 'storage/' . Auth::user()->avatar : 'storage/images/default.png') }}" alt="アカウント">{{-- <span>プロフィール</span> --}}</li>
         </ul>
-    </header>
+      </header>
 
     <!-- メイン -->
     <main style="flex:1; padding:20px; max-width:720px; margin:auto;">
