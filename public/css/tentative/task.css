@@ -45,7 +45,7 @@
 .gantt-wrapper {
   border: 1px solid #ddd;
   border-radius: 6px;
-  overflow-x: auto;      /* 横スクロール */
+  overflow-x: auto;      /*横スクロール*/
   overflow-y: hidden;
   margin-top: 20px;
   position: relative;
@@ -53,6 +53,7 @@
   background: #fff; /* ✅ 薄いグレーをやめて真っ白に */
   /* scroll-behavior: smooth; */
   width: 100%;   
+  max-width: 1100px;
 
 }
   
