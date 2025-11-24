@@ -7,53 +7,48 @@ document.addEventListener('DOMContentLoaded', function () {
   const contents = document.querySelectorAll('.tab-container .content');
 
   // 📅 カレンダーを今日の位置にスクロールする関数
-  // 📅 カレンダーを今日の位置にスクロールする関数（位置を直接拾う版）
   function scrollCalendarToToday(force = false) {
     if (!window.taskCalendar) return;
 
-    const wrapper = document.querySelector('.gantt-wrapper'); // 必要ならセレクタ調整
+    const wrapper = document.querySelector('#content-calendar .gantt-wrapper'); // 必要ならセレクタ調整
     if (!wrapper) return;
 
-    const yearDisplay = document.getElementById('yearDisplay');
-    const calendarYear = parseInt(yearDisplay.dataset.year, 10);
-
-    const today = new Date();
-    const todayYear = today.getFullYear();
-    if (calendarYear !== todayYear) {
-      // 表示している年と今年が違うときはスクロールしない
-      return;
-    }
-
+    // 非表示中でも「位置だけ」先にセットする 
+    const calendarYear = parseInt(window.taskCalendar.startDate.slice(0, 4), 10); 
+    const today = new Date(); 
+    const todayYear = today.getFullYear(); 
+    if (calendarYear !== todayYear) 
+      return
+    ;
     const todayStr = today.toISOString().slice(0, 10);
+    const dayWidth = parseFloat(getComputedStyle(wrapper).getPropertyValue('--day-width')) || 32;
+    const start = new Date(window.taskCalendar.startDate);
+    const todayDate = new Date(todayStr);
+    const oneDay = 24*60*60*1000;
+    const diffDays = Math.floor((todayDate - start) / oneDay);
+  
+    // wrapper の幅が取得できない（display:none）場合 → 仮の幅を設定
+    let wrapperWidth = wrapper.clientWidth || 1000;
+    // 非表示でも仮値でOK
 
-    // ヘッダー側の日付セル（.gantt-day-row）の中から今日のセルを探す
-    const todayCell = wrapper.querySelector(
-      '.gantt-day-row .gantt-day[data-date="' + todayStr + '"]'
-    );
-    if (!todayCell) {
-      console.log('今日の日付セルが見つかりません:', todayStr);
-      return;
-    }
-
-    // wrapper から見た todayCell の相対位置を計算
-    const wrapperRect = wrapper.getBoundingClientRect();
-    const cellRect = todayCell.getBoundingClientRect();
-
-    let target = wrapper.scrollLeft + (cellRect.left - wrapperRect.left) - 180; // 180px だけ左に余白
+    let target = (diffDays - 0) * dayWidth - 180; 
     if (target < 0) target = 0;
+    console.log('日数差:', diffDays);
 
-    const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+    // スクロール可能範囲チェック
+    const maxScroll = wrapper.scrollWidth - wrapperWidth; 
     if (target > maxScroll) target = maxScroll;
 
-    wrapper.scrollLeft = target;
-    console.log('✅ 今日の位置にスクロール:', todayStr, '→', target);
+    // 位置をセット（アニメーション不要で即座に）
+    wrapper.scrollLeft = target; 
+    console.log('✅ 今日の位置セット:', todayStr, target, '日数差:', diffDays);
 
-    // タブ切替直後などで再調整したい場合
-    if (force) {
-      setTimeout(() => {
-        wrapper.scrollLeft = target;
-      }, 300);
-    }
+    // 強制再スクロール指定時は、表示後に再度セット
+    if (force) { 
+      setTimeout(() => { 
+        wrapper.scrollLeft = target; 
+      }, 300); 
+    } 
   }
 
   // ----------------------------
