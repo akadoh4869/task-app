@@ -56,18 +56,14 @@
         <section class="t-head">
           <div class="year">
             @if ($year > 2025)
-              <a href="#" id="prevYear">
-                <img src="{{ asset('images/left.png') }}" alt="前の年" width="50px" />
-              </a>
+              <a href="#" id="prevYear"><</a>
             @else
               <span style="width: 50px; display: inline-block;"></span>
             @endif
 
             <p id="yearDisplay" data-year="{{ $year }}">{{ $year }}年</p>
 
-            <a href="#" id="nextYear">
-              <img src="{{ asset('images/right.png') }}" alt="次の年" width="50px" />
-            </a>
+            <a href="#" id="nextYear">></a>
           </div>
 
           <ul id="list">
@@ -96,6 +92,12 @@
                     <input type="checkbox" onchange="completeTask({{ $task->id }}, this)">
                     <a href="{{ route('task.detail', $task->id) }}">
                       {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
+                       {{-- ▼ ここでグループ名 or 個人タスクを表示 --}}
+                        <span class="task-group-label">
+                          @if ($task->group)
+                            {{ $task->group->group_name }}
+                          @endif
+                        </span>
                     </a>
                   </td>
                 </tr>
