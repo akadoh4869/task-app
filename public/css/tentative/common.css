@@ -1,19 +1,44 @@
+:root {
+  --sidebar-width: 20%;
+}
+
 /* header部分 */
-.flex,.menu {
+.flex{
+  padding: 0%;
+  margin: 0%;
+  position: relative;
+}
+
+.menu {
   padding: 0%;
   margin: 0%;
 }
 
-.sidebar{
-  width: 300px;
+/* .sidebar{
+  width: 20%;
   z-index: 5;
+ 
+} */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  /* 背景色などお好みで */
+  /* background-color: #fff; */
 }
 
 
 /* // 🟩 透明な「hover検知ゾーン」を設置 */
 .sidebar-hover-zone {
-  width: 300px; 
-  height: 100%;
+  width: 20%; 
+  
+  /* height: 100%; */
 }
 
 .logo > a > img {
@@ -28,6 +53,7 @@
 .menu:hover li a span {
   opacity: 1;
   visibility: visible; 
+  transform: translateX(0);  /* 元の位置へ */
   
   
 }
@@ -35,26 +61,43 @@
 .menu > li > a > span{
   visibility: hidden;
   opacity: 0;
-  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); 
+  /* transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);  */
+  transform: translateX(-15px); /* 左から */
+  transition: 
+    opacity .4s ease,
+    visibility .4s ease,
+    transform .4s cubic-bezier(0.25, 0.1, 0.25, 1);
   
 }
 
-li a:hover{
+/* li a:hover{
   display: flex;
   align-items: center;
   background-color: #ddd;
   border-radius: 10px;
   padding: 10px 15px;
+} */
 
+.menu li a {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  padding: 10px 15px;
+  text-decoration: none;
+}
 
+/* hover では色だけ変える */
+.menu li a:hover {
+  background-color: #ddd;
 }
 
 li > img {
   width: 35px;
   height: 35px;
-  /* margin: 30px 0; */
+  margin: 30px 0;
   border-radius: 50%;
   object-fit: cover;
+  margin-left: 20px;
 }
 
 li{
@@ -66,7 +109,7 @@ li{
   
 }
 span{
-  padding-left: 15px;
+  padding-left: 25px;
   font-size: 20px;
   
 }
