@@ -81,34 +81,48 @@
         <div class="tab-container">
            {{-- リストの内容 --}}
           <section id="content-list" class="content active">
-            <table>
+            <div class="task-list">
+
               @foreach ($allPersonalTasks as $task)
-                <tr class="flex2">
-                  <th>
+
+                <a href="{{ route('task.detail', $task->id) }}" class="task-row-link">
+
+                  {{-- 左：期日 --}}
+                  <div class="task-date">
                     {{ optional($task->start_date)->format('md') ?? '未設定' }}〜
                     {{ optional($task->due_date)->format('md') ?? '未設定' }}
-                  </th>
-                  <td class="flex2">
-                    <input type="checkbox" onchange="completeTask({{ $task->id }}, this)">
-                    <a href="{{ route('task.detail', $task->id) }}">
+                  </div>
+
+                  {{-- 右：チェック＋本文 --}}
+                  <div class="task-main">
+
+                    <input
+                      type="checkbox"
+                      onclick="event.stopPropagation(); event.preventDefault();"
+                      onchange="completeTask({{ $task->id }}, this)"
+                    >
+
+                    <div class="task-text">
                       {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
-                       {{-- ▼ ここでグループ名 or 個人タスクを表示 --}}
+
+                      @if ($task->group)
                         <span class="task-group-label">
-                          @if ($task->group)
-                            {{ $task->group->group_name }}
-                          @endif
+                          {{ $task->group->group_name }}
                         </span>
-                    </a>
-                  </td>
-                </tr>
+                      @endif
+                    </div>
+
+                  </div>
+
+                </a>
+
               @endforeach
 
               @if ($allPersonalTasks->isEmpty())
-                <tr>
-                  <td colspan="2">現在、{{ $year }}年のタスクはありません。</td>
-                </tr>
+                <p>現在、{{ $year }}年のタスクはありません。</p>
               @endif
-            </table>
+
+            </div>
           </section>
 
           {{-- カレンダー --}}
