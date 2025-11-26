@@ -43,65 +43,52 @@ main{
 }
 
 /* 📌 リスト全体の調整 */
-#content-list table {
-  width: 80%;
-  margin-left: 20%;
-  border-collapse: separate;
-  border-spacing: 0 8px; /* 行間に余白 */
+.task-list {
+  width: 100%;
 }
 
-/* 📌 1行カード風に（スクショの丸角っぽく） */
-#content-list tr {
-  background-color: #ffffff;
-  border-radius: 10px;
-  overflow: hidden;
-  height: 55px;
-  border: 1px solid #ccc;
-}
-
-/* 📌 期限切れの行を赤背景に */
-#content-list tr.overdue {
-  background-color: #f3b1bc; /* スクショ参考 ピンク寄り赤 */
-}
-
-/* 📌 日付部分 */
-#content-list th {
-  width: 130px;
-  text-align: center;
-  font-size: 14px;
-  color: #333;
-  font-weight: normal;
-  border-right: 1px solid #ccc;
-}
-
-/* 📌 タスク名側をフレックスに */
-#content-list td {
-  padding: 0 10px;
+.task-row-link {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-/* 📌 チェックボックスのサイズ調整 */
-#content-list input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-}
-
-/* 📌 リンク装飾 */
-#content-list a {
-  color: #333;
+  width: 60%;
+  margin: 10px auto;   /* 中央寄せ */
   text-decoration: none;
+  color: #333;
+  background: #fff;
+  padding: 10px;
 }
 
-#content-list a:hover {
-  text-decoration: underline;
+.task-row-link:hover {
+  background-color: #f5f7fa;
 }
 
-.task-group-label{
-  font-size: 15px;
-  
+/* 左：期日 */
+.task-date {
+  width: 130px;
+  text-align: center;
+  border-right: 1px solid #ccc;
+  font-size: 14px;
+  padding: 8px 0;
 }
+
+/* 右：本文 */
+.task-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  flex: 1;
+}
+
+.task-group-label {
+  margin-left: 8px;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+}
+
 /*カレンダー*/
 /* =========================================================
    🎯 ガントチャート全体設定 
@@ -117,6 +104,8 @@ main{
   background: #fff; /* ✅ 薄いグレーをやめて真っ白に */
   /* scroll-behavior: smooth; */
   width: 100%;   
+  width: calc(100% - var(--sidebar-width));  /* ✅ サイドバー分を引く */
+  margin-left: var(--sidebar-width);         /* ✅ 左をサイドバー分ずらす */
   max-width: 1100px;
 
 }
@@ -128,7 +117,7 @@ main{
 .gantt-header {
   display: grid;
   grid-template-columns: 180px 1fr;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #aeacac;
   background: #f5f5f5;
   position: relative;
   width: max-content; 
@@ -142,7 +131,7 @@ main{
   z-index: 5;
   font-weight: 600;
   padding: 8px 10px;
-  border-right: 1px solid #ddd;
+  border-right: 1px solid #aeacac;
   background: #f5f5f5;  /* ← 背景グレー */
 }
 
@@ -151,13 +140,13 @@ main{
 .gantt-timeline {
   --day-width: 32px;
   background: #fff;
-  border-left: 1px solid #eee;
+  border-left: 1px solid #aeacac;
 }
 
 /* 上段：月ラベル行 */
 .gantt-month-row {
   display: flex;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #aeacac;
   background: #fafafa;
 }
 
@@ -166,7 +155,7 @@ main{
   font-size: 12px;
   font-weight: bold;
   color: #444;
-  border-right: 1px solid #eee;
+  border-right: 1px solid #aeacac;
   padding: 4px 0;
 }
 
@@ -181,13 +170,28 @@ main{
 }
 
 .gantt-day {
-  text-align: center;
+  display: flex;
+  align-items: center;       /* 横中央 */
+  justify-content: center;   /* 縦中央 */
+  width: var(--day-width);
+  height: 24px;
+  box-sizing: border-box;    /* ✅ 枠線を幅計算に含める */
+  border-left: 2px solid #aeacac;
+  background: #f5f5f5;
+}
+
+.day-label {
   font-size: 10px;
   color: #666;
-  height: 24px;
-  line-height: 24px;
-  border-right: 1px solid #eee;
+  line-height: 1;
+  margin-right: 25px;
+  margin-top: 8px;
+  justify-content: center;
+  align-items: center;
+  
+  
 }
+
 
 /* =========================================================
    📅 ボディ部（タスク行）
@@ -202,13 +206,13 @@ main{
 .gantt-row {
   display: grid;
   grid-template-columns: 180px 1fr;
-  border-bottom: 0.5px solid #f0f0f0;
+  border-bottom: 1px solid #d4d4d4;
   width: calc(var(--day-width) * 365); /* 年間分の横幅 */
 }
 
 /* 件名セル（固定列） */
 .gantt-task-col {
-  padding: 10px;
+  padding: 15px;
   border-right: 1px solid #eee;
   font-size: 13px;
   background: #f5f5f5;
