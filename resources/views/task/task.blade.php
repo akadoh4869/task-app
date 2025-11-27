@@ -161,7 +161,7 @@
                   <div class="gantt-day-row">
                     @php $d = $startDate->copy(); @endphp
                     @while ($d->lte($endDate))
-                      <div class="gantt-day" data-date="{{ $d->format('Y-m-d') }}">
+                      <div class="gantt-day gantt-number_day" data-date="{{ $d->format('Y-m-d') }}">
                         <span class="day-label">{{ $d->format('j') }}</span>
                       </div>
                       @php $d->addDay(); @endphp
@@ -196,8 +196,8 @@
                             data-overdue="{{ $isOverdue ? '1' : '0' }}">
                           <span class="gantt-label">{{ $task->task_name }}</span>
                         </div>
-                      @else
-                        <span class="no-date"></span>
+                      {{-- @else
+                        <span class="no-date"></span> --}}
                       @endif
 
                     </div>
