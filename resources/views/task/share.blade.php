@@ -6,8 +6,25 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('css/tentative/task.css')}}"/>
     <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    @php
+    use Carbon\Carbon;
+
+    // コントローラから $year を受け取っている前提
+    $startDate = Carbon::create($year, 1, 1);
+    $endDate   = $startDate->copy()->endOfYear();
+    $days      = $startDate->diffInDays($endDate) + 1; // 365 or 366
+    @endphp
+
+    <script>
+      window.taskCalendar = {
+        startDate: "{{ $startDate->format('Y-m-d') }}",
+        endDate: "{{ $endDate->format('Y-m-d') }}",
+        days: {{ $days }}
+      };
+    </script>
     <script src="{{ asset('js/tentative/common.js') }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -35,22 +52,17 @@
       
       <main>
         <!--コンテンツ-->
-        <div class="main">
           <section class="t-head">
             <div class="year">
               @if ($year > 2025)
-                <a href="#" id="prevYear">
-                  <img src="{{ asset('images/left.png') }}" alt="前の年" width="50px" />
-                </a>
+                <a href="#" id="prevYear"><</a>
               @else
                 <span style="width: 50px; display: inline-block;"></span>
               @endif
 
               <p id="yearDisplay" data-year="{{ $year }}">{{ $year }}年</p>
 
-              <a href="#" id="nextYear">
-                <img src="{{ asset('images/right.png') }}" alt="次の年" width="50px" />
-              </a>
+              <a href="#" id="nextYear">></a>
             </div>
             <ul id="list">
               <li class="tab1 active" data-tab="list">リスト</li>
@@ -61,66 +73,166 @@
               <div id="listContent" class="tab-pane">リストの内容</div>
               <div id="calendarContent" class="tab-pane hidden">カレンダーの内容</div>
             </div>
-
-
-            <div class="tab-container">
-              <form method="GET" action="{{ route('task.share') }}">
-                  <label for="group_id">グループ選択：</label>
-                  <select name="group_id" id="group_id" onchange="this.form.submit()">
-                      @foreach ($groups as $group)
-                          <option value="{{ $group->id }}" {{ $selectedGroupId == $group->id ? 'selected' : '' }}>
-                              {{ $group->group_name }}
-                          </option>
-                      @endforeach
-
-                      {{-- グループ作成オプション --}}
-                      <option value="create" {{ $selectedGroupId === 'create' ? 'selected' : '' }}>
-                          ＋ グループを作る
-                      </option>
-                  </select>
-              </form>
-
-              {{-- 「グループを作る」が選択されているとき or 未所属のとき --}}
-              @if ($selectedGroupId === 'create' || $groups->isEmpty())
-                  <div style="text-align: center; margin-top: 50px;">
-                      <p>グループを作成してタスクを共有しましょう。</p>
-                      <a href="{{ route('group.create') }}" class="btn" style="padding: 10px 20px; background: #3490dc; color: white; border-radius: 5px; text-decoration: none;">
-                          グループを作成する
-                      </a>
-                  </div>
-              @elseif ($selectedGroupId)
-                  {{-- グループタスク表示 --}}
-                  <section id="content-list" class="content active">
-                      <table>
-                          @foreach ($groupTasks as $task)
-                              <tr class="flex2">
-                                  <th>
-                                    {{ optional($task->start_date)->format('md') ?? '未設定' }}〜
-                                    {{ optional($task->due_date)->format('md') ?? '未設定' }}
-                                  </th>
-                                  <td class="flex2">
-                                      <input type="checkbox" onchange="completeTask({{ $task->id }}, this)">
-                                      <a href="{{ route('task.detail', $task->id) }}">
-                                          {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
-                                      </a>
-                                  </td>
-                              </tr>
-                          @endforeach
-
-                          @if ($groupTasks->isEmpty())
-                              <tr>
-                                  <td colspan="2">現在、グループタスクはありません。</td>
-                              </tr>
-                          @endif
-                      </table>
-                  </section>
-
-                  <section id="content-calendar" class="content">
-                      <p>カレンダー表示エリア</p>
-                  </section>
-              @endif
-          </div>
           </section>
+
+
+          <div class="tab-container">
+            <form method="GET" action="{{ route('task.share') }}">
+                <label for="group_id">グループ選択：</label>
+                <select name="group_id" id="group_id" onchange="this.form.submit()">
+                    @foreach ($groups as $group)
+                        <option value="{{ $group->id }}" {{ $selectedGroupId == $group->id ? 'selected' : '' }}>
+                            {{ $group->group_name }}
+                        </option>
+                    @endforeach
+
+                    {{-- グループ作成オプション --}}
+                    <option value="create" {{ $selectedGroupId === 'create' ? 'selected' : '' }}>
+                        ＋ グループを作る
+                    </option>
+                </select>
+            </form>
+
+            {{-- 「グループを作る」が選択されているとき or 未所属のとき --}}
+            @if ($selectedGroupId === 'create' || $groups->isEmpty())
+                <div style="text-align: center; margin-top: 50px;">
+                    <p>グループを作成してタスクを共有しましょう。</p>
+                    <a href="{{ route('group.create') }}" class="btn" style="padding: 10px 20px; background: #3490dc; color: white; border-radius: 5px; text-decoration: none;">
+                        グループを作成する
+                    </a>
+                </div>
+            @elseif ($selectedGroupId)
+                {{-- グループタスク表示 --}}
+                {{-- ▼ グループタスク：リスト表示 --}}
+                <section id="content-list" class="content active">
+                  <div class="task-list">
+
+                    @foreach ($groupTasks as $task)
+
+                      <a href="{{ route('task.detail', $task->id) }}" class="task-row-link">
+
+                        {{-- 左：期間 --}}
+                        <div class="task-date">
+                          {{ optional($task->start_date)->format('md') ?? '未設定' }}〜
+                          {{ optional($task->due_date)->format('md') ?? '未設定' }}
+                        </div>
+
+                        {{-- 右：チェック＋本文 --}}
+                        <div class="task-main">
+
+                          <input
+                            type="checkbox"
+                            onclick="event.stopPropagation(); event.preventDefault();"
+                            onchange="completeTask({{ $task->id }}, this)"
+                          >
+
+                          <div class="task-text">
+                            {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
+
+                            {{-- どのグループのタスクか分かるようにラベル表示（任意） --}}
+                            @if ($task->group)
+                              <span class="task-group-label">
+                                {{ $task->group->group_name }}
+                              </span>
+                            @endif
+                          </div>
+
+                        </div>
+
+                      </a>
+
+                    @endforeach
+
+                    @if ($groupTasks->isEmpty())
+                      <p>現在、グループタスクはありません。</p>
+                    @endif
+
+                  </div>
+                </section>
+
+                {{-- カレンダー --}}
+                <section id="content-calendar" class="content">
+                  <div class="gantt-wrapper">
+
+                    {{-- =========================
+                        ヘッダー部
+                    ========================== --}}
+                    <div class="gantt-header">
+                      <div class="gantt-task-col">タスク名</div>
+                      <div class="gantt-timeline">
+
+                        {{-- 月ラベル行 --}}
+                        <div class="gantt-month-row">
+                          @php
+                            $prevMonth = null;
+                            $start = $startDate->copy();
+                            $end = $endDate->copy();
+                          @endphp
+
+                          @while ($start->lte($end))
+                            @php
+                              $monthStart = $start->copy()->startOfMonth();
+                              $monthEnd = $start->copy()->endOfMonth();
+                              $daysInMonth = $monthEnd->diffInDays($monthStart) + 1;
+                            @endphp
+                            <div class="gantt-month" style="width: calc(var(--day-width) * {{ $daysInMonth }})">
+                              {{ $start->format('n月') }}
+                            </div>
+                            @php $start->addMonth(); @endphp
+                          @endwhile
+                        </div>
+
+                        {{-- 日付ラベル行 --}}
+                        <div class="gantt-day-row">
+                          @php $d = $startDate->copy(); @endphp
+                          @while ($d->lte($endDate))
+                            <div class="gantt-day gantt-number_day" data-date="{{ $d->format('Y-m-d') }}">
+                              <span class="day-label">{{ $d->format('j') }}</span>
+                            </div>
+                            @php $d->addDay(); @endphp
+                          @endwhile
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {{-- =========================
+                        ボディ部
+                    ========================== --}}
+                    <div class="gantt-body">
+                      @foreach($groupTasks as $task)
+                        <div class="gantt-row">
+                          <div class="gantt-task-col">{{ $task->task_name }}</div>
+                          <div class="gantt-timeline">
+
+                            {{-- 📅 各タスク行にも日付セルを生成（透明背景） --}}
+                            @php $d = $startDate->copy(); @endphp
+                            @while ($d->lte($endDate))
+                              <div class="gantt-day" data-date="{{ $d->format('Y-m-d') }}"></div>
+                              @php $d->addDay(); @endphp
+                            @endwhile
+
+                            {{-- 📊 タスクバー --}}
+                            @if ($task->start_date && $task->due_date)
+                              @php $isOverdue = $task->due_date->isPast(); @endphp
+                              <div class="gantt-bar"
+                                  data-start="{{ $task->start_date->format('Y-m-d') }}"
+                                  data-end="{{ $task->due_date->format('Y-m-d') }}"
+                                  data-overdue="{{ $isOverdue ? '1' : '0' }}">
+                                <span class="gantt-label">{{ $task->task_name }}</span>
+                              </div>
+                            {{-- @else
+                              <span class="no-date"></span> --}}
+                            @endif
+
+                          </div>
+                        </div>
+                      @endforeach
+                    </div>
+                  </div>
+                </section>
+            @endif
+          </div>
           <section>
             {{-- グループメンバー一覧 --}}
             @if ($selectedGroup)
@@ -191,8 +303,6 @@
           </section>
 
             
-
-        </div>
         
 
         
