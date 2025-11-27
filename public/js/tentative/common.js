@@ -25,15 +25,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const start = new Date(window.taskCalendar.startDate);
     const todayDate = new Date(todayStr);
     const oneDay = 24*60*60*1000;
-    const diffDays = Math.floor((todayDate - start) / oneDay);
-  
+    // const diffDays = Math.floor((todayDate - start) / oneDay);
+    const dayOffset = Math.floor((todayDate - start) / oneDay);
+
     // wrapper の幅が取得できない（display:none）場合 → 仮の幅を設定
     let wrapperWidth = wrapper.clientWidth || 1000;
     // 非表示でも仮値でOK
 
-    let target = (diffDays - 0) * dayWidth - 180; 
+    let target = (dayOffset - 0) * dayWidth - 180;
     if (target < 0) target = 0;
-    console.log('日数差:', diffDays);
+    console.log('日数差:', dayOffset);
 
     // スクロール可能範囲チェック
     const maxScroll = wrapper.scrollWidth - wrapperWidth; 
@@ -41,7 +42,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 位置をセット（アニメーション不要で即座に）
     wrapper.scrollLeft = target; 
-    console.log('✅ 今日の位置セット:', todayStr, target, '日数差:', diffDays);
+    // console.log('✅ 今日の位置セット:', todayStr, target, '日数差:', diffDays);
+    console.log('✅ 今日の位置セット:', todayStr, target, '日数差:', dayOffset);
 
     // 強制再スクロール指定時は、表示後に再度セット
     if (force) { 
@@ -106,10 +108,19 @@ document.addEventListener('DOMContentLoaded', function () {
       return new Date(Date.UTC(y, m - 1, d));
     }
 
+    // ★ ここに追加
+    function diffDays(a, b) {
+      const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+      const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+      return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24)) + 1;
+    }
+
     const startDate = parseYmdToUtc(window.taskCalendar.startDate);
     const endDate = parseYmdToUtc(window.taskCalendar.endDate);
     const oneDayMs = 24 * 60 * 60 * 1000;
-    const totalDays = (endDate - startDate) / oneDayMs + 1;
+    // const totalDays = (endDate - startDate) / oneDayMs + 1;
+    // const totalDays = Math.round((endDate - startDate) / oneDayMs) + 1;
+    const totalDays = diffDays(startDate, endDate);
 
     const now = new Date();
     const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());

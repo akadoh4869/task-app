@@ -94,7 +94,7 @@ main{
    🎯 ガントチャート全体設定 
    ========================================================= */
 .gantt-wrapper {
-  border: 1px solid #ddd;
+  border: 2px solid #d4d4d4;
   border-radius: 6px;
   overflow-x: auto;      /*横スクロール*/
   overflow-y: hidden;
@@ -117,7 +117,7 @@ main{
 .gantt-header {
   display: grid;
   grid-template-columns: 180px 1fr;
-  border-bottom: 1px solid #aeacac;
+  border-bottom: 2px solid #d4d4d4;
   background: #f5f5f5;
   position: relative;
   width: max-content; 
@@ -131,7 +131,7 @@ main{
   z-index: 5;
   font-weight: 600;
   padding: 8px 10px;
-  border-right: 1px solid #aeacac;
+  border-right: 1px solid #d4d4d4;
   background: #f5f5f5;  /* ← 背景グレー */
 }
 
@@ -147,7 +147,7 @@ main{
 .gantt-month-row {
   display: flex;
   border-bottom: 1px solid #aeacac;
-  background: #fafafa;
+  background: #f5f5f5;
 }
 
 .gantt-month {
@@ -167,31 +167,9 @@ main{
   background-image: linear-gradient(to right, #f0f0f0 1px, transparent 1px);
   background-size: var(--day-width) 100%;
   background-repeat: repeat-x;
-}
-
-.gantt-day {
-  display: flex;
-  align-items: center;       /* 横中央 */
-  justify-content: center;   /* 縦中央 */
-  width: var(--day-width);
-  height: 24px;
-  box-sizing: border-box;    /* ✅ 枠線を幅計算に含める */
-  border-left: 2px solid #aeacac;
   background: #f5f5f5;
-}
 
-.day-label {
-  font-size: 10px;
-  color: #666;
-  line-height: 1;
-  margin-right: 25px;
-  margin-top: 8px;
-  justify-content: center;
-  align-items: center;
-  
-  
 }
-
 
 /* =========================================================
    📅 ボディ部（タスク行）
@@ -207,13 +185,13 @@ main{
   display: grid;
   grid-template-columns: 180px 1fr;
   border-bottom: 1px solid #d4d4d4;
-  width: calc(var(--day-width) * 365); /* 年間分の横幅 */
+  /* width: calc(var(--day-width) * 365);  */
 }
 
 /* 件名セル（固定列） */
 .gantt-task-col {
   padding: 15px;
-  border-right: 1px solid #eee;
+  border-right: 2px solid #d4d4d4;
   font-size: 13px;
   background: #f5f5f5;
   color: #333;
@@ -253,7 +231,11 @@ main{
   align-items: center;
   justify-content: flex-start;
   width: var(--day-width);
-  border-left: 1px solid #f0f0f0;
+  border-left: 1px solid #d4d4d4;
+  background: #fff;
+}
+
+.gantt-number_day {
   background: #f5f5f5;
 }
 
@@ -263,14 +245,18 @@ main{
   font-weight: 600;
   color: #666;
   margin-bottom: 2px;
-  height: 14px;
+  height: 15px;
 }
 
-/* 日ラベル */
 .day-label {
-  font-size: 8px;
-  color: #999;
-  height: 12px;
+  font-size: 9px;
+  color: #666;
+  line-height: 1;
+  margin-right: 25px;
+  margin-top: 8px;
+  justify-content: center;
+  align-items: center;
+  height: 15px;
 }
 
 
