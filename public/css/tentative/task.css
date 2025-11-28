@@ -1,6 +1,6 @@
 /* main部分 */
 main{
-  text-align: center;
+  /* text-align: center; */
 }
 
 /* 年の行を中央寄せ */
@@ -15,8 +15,14 @@ main{
   margin-bottom: 0%;
 }
 
+ul{
+  padding-left: 15%;
+}
+
 .content {
   display: none;
+  width:100%;
+
 }
 .content.active {
   display: block;
@@ -31,7 +37,8 @@ main{
   cursor: pointer;
   margin-top: 1%;
   font-size: 20px;
-  width: 30%;
+  width: 35%;
+  text-align: center;
   font-weight: lighter;
 }
 
@@ -49,8 +56,10 @@ main{
 .task-row-link {
   display: flex;
   align-items: center;
-  width: 60%;
-  margin: 10px auto;   /* 中央寄せ */
+  justify-content: flex-start;
+  width: 69%;
+  margin-left: 15%;
+  /* margin: 10px auto;   中央寄せ */
   text-decoration: none;
   color: #333;
   background: #fff;
@@ -101,11 +110,9 @@ main{
   position: relative;
   --day-width: 32px;     /* 1日あたりの幅 */
   background: #fff; /* ✅ 薄いグレーをやめて真っ白に */
-  /* scroll-behavior: smooth; */
-  width: 100%;   
   width: calc(100% - var(--sidebar-width));  /* ✅ サイドバー分を引く */
   margin-left: var(--sidebar-width);         /* ✅ 左をサイドバー分ずらす */
-  max-width: 1100px;
+  max-width: 69%;
 
 }
   
@@ -294,3 +301,4 @@ main{
   color: #aaa;
   padding-left: 8px;
 }
+
