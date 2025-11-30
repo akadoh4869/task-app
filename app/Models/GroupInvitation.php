@@ -11,9 +11,10 @@ class GroupInvitation extends Model
 
     protected $fillable = [
         'group_id',
-        'invited_by',
-        'user_id',
+        'inviter_id',   // ★ ここを修正
+        'invitee_id',   // ★ ここを修正
         'status',
+        'responded_at', // 使っているなら追加
     ];
 
     // 関連するグループ
@@ -25,12 +26,12 @@ class GroupInvitation extends Model
     // 招待を送ったユーザー
     public function inviter()
     {
-        return $this->belongsTo(User::class, 'invited_by');
+        return $this->belongsTo(User::class, 'inviter_id'); // ★ invited_by → inviter_id
     }
 
     // 招待されたユーザー
     public function invitee()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'invitee_id'); // ★ user_id → invitee_id
     }
 }
