@@ -39,86 +39,97 @@
           @csrf
           @method('PATCH')
 
-          <h2>{{ $task->task_name }}</h2>
-
-            <p>作成日: {{ $task->created_at->format('Y年m月d日') }}</p>
-            {{-- <p>期限: {{ optional($task->due_date)->format('Y年m月d日') ?? '未設定' }}</p> --}}
-            {{-- ✅ ここを修正済み --}}
-            <p>開始日:</p>
-            <input type="date" name="start_date" value="{{ optional($task->start_date)->format('Y-m-d') }}" max="9999-12-31">
-
-            <p>期限:</p>
-            <input type="date" name="due_date" value="{{ optional($task->due_date)->format('Y-m-d') }}" max="9999-12-31">
-
-
-            @if ($task->group)
-                <p>グループ: {{ $task->group->group_name }}</p>
-            @else
-                <p>個人タスク</p>
-            @endif
-
-            @if ($task->group && $task->group->users->isNotEmpty())
-              <p>担当メンバー:</p>
-
-              @php
-                  $assignees = $task->assignedUsers; // 多対多: task_user
-              @endphp
-
-              <div id="assigned-user-list" style="display:flex; flex-wrap:wrap; gap:15px;">
-                  @forelse ($assignees as $user)
-                  @php
-                      $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
-                          ? asset('storage/' . $user->avatar)
-                          : asset('storage/images/default.png');
-                  @endphp
-
-                  <div class="assigned-user" style="position:relative; display:flex; align-items:center; gap:5px; background:#f0f0f0; padding:5px 10px; border-radius:8px;">
-                      <img src="{{ $avatarPath }}" alt="{{ $user->user_name }}" width="30" height="30" style="border-radius:50%;">
-                      <span class="assigned-name">{{ $user->user_name }}</span>
-                      <input type="hidden" name="assigned_user_ids[]" value="{{ $user->id }}">
-                      <button type="button" class="remove-user" onclick="removeUser(this)">×</button>
-                  </div>
-                  @empty
-                  {{-- 誰もアサインされていない場合の表示 --}}
-                  <div id="assigned-empty" class="muted">
-                      {{ $task->group_id ? '（担当者なし：共有）' : '（担当者なし）' }}
-                  </div>
-                  @endforelse
+          <div class="task-container">
+            <div class="task-info">
+              <div class="task-name">
+                <h2>{{ $task->task_name }}</h2>
+              </div>
+              <div class="task-status">
+                <span id="status-dot" class="status-dot"></span>
+                <select name="status" class="status" id="status-select">
+                  <option value="not_started" {{ $task->status === 'not_started' ? 'selected' : '' }}>未着手</option>
+                  <option value="in_progress" {{ $task->status === 'in_progress' ? 'selected' : '' }}>進行中</option>
+                  <option value="completed" {{ $task->status === 'completed' ? 'selected' : '' }}>完了</option>
+                </select>
               </div>
 
-              <br>
+            </div>
+           
+            <div class="create-date">
+              <p>作成日: {{ $task->created_at->format('Y年m月d日') }}</p>
 
-              <p>メンバーを追加:</p>
-              <select id="add-user-select" onchange="addSelectedUser()">
-                  <option value="">-- メンバーを選択 --</option>
-                  @foreach ($task->group->users as $user)
-                      @if (!$assignees->contains('id', $user->id))
-                          @php
-                              $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
-                                  ? asset('storage/' . $user->avatar)
-                                  : asset('storage/images/default.png');
-                          @endphp
-                          <option value="{{ $user->id }}"
-                                  data-avatar="{{ $avatarPath }}"
-                                  data-name="{{ $user->user_name }}">
-                              {{ $user->user_name }}
-                          </option>
-                      @endif
-                  @endforeach
-              </select>
-              @endif
+            </div>
+            <div class="task-date">
+              <input type="date" class="date" name="start_date" value="{{ optional($task->start_date)->format('Y-m-d') }}" max="9999-12-31"> ～
+              <input type="date" class="date" name="due_date" value="{{ optional($task->due_date)->format('Y-m-d') }}" max="9999-12-31">
+            </div>
+            <div class="task-belong">
+              <div class="task-group">
+                @if ($task->group)
+                  <p>グループ: <span>{{ $task->group->group_name }}</span></p>
+                @else
+                    <p>個人タスク</p>
+                @endif
 
+              </div>
+              <div class="task-assignee">
+                @if ($task->group && $task->group->users->isNotEmpty())
+                  <p>担当メンバー:</p>
 
+                  @php
+                      $assignees = $task->assignedUsers; // 多対多: task_user
+                  @endphp
 
-            {{-- ステータス変更 --}}
-            <p>ステータス:</p>
-            <select name="status">
-                <option value="not_started" {{ $task->status === 'not_started' ? 'selected' : '' }}>未着手</option>
-                <option value="in_progress" {{ $task->status === 'in_progress' ? 'selected' : '' }}>進行中</option>
-                <option value="completed" {{ $task->status === 'completed' ? 'selected' : '' }}>完了</option>
-            </select>
+                  <div id="assignee-group" style="display:flex; flex-wrap:wrap; gap:15px;">
+                    @forelse ($assignees as $user)
+                      @php
+                          $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
+                              ? asset('storage/' . $user->avatar)
+                              : asset('storage/images/default.png');
+                      @endphp
 
-              @php
+                      <div class="assignee-item">
+                          <img src="{{ $avatarPath }}" alt="{{ $user->user_name }}"  class="assignee-avatar" width="30" height="30" style="border-radius:50%;">
+                          <span class="assignee-name">{{ $user->user_name }}</span>
+                          <input type="hidden" name="assigned_user_ids[]" value="{{ $user->id }}">
+                          <button type="button" class="remove-user" onclick="removeUser(this)">×</button>
+                      </div>
+                      @empty
+                      {{-- 誰もアサインされていない場合の表示 --}}
+                      <div id="assigned-empty" class="muted">
+                          {{ $task->group_id ? '（担当者なし：共有）' : '（担当者なし）' }}
+                      </div>
+                    @endforelse
+                  </div>
+
+                  <br>
+
+                  <p>メンバーを追加:</p>
+                  <select id="add-user-select" onchange="addSelectedUser()">
+                      <option value="">-- メンバーを選択 --</option>
+                      @foreach ($task->group->users as $user)
+                          @if (!$assignees->contains('id', $user->id))
+                              @php
+                                  $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
+                                      ? asset('storage/' . $user->avatar)
+                                      : asset('storage/images/default.png');
+                              @endphp
+                              <option value="{{ $user->id }}"
+                                      data-avatar="{{ $avatarPath }}"
+                                      data-name="{{ $user->user_name }}">
+                                  {{ $user->user_name }}
+                              </option>
+                          @endif
+                      @endforeach
+                  </select>
+                @endif
+              </div>
+     
+            </div>
+            
+
+            <div class="task-file">
+               @php
                   use Illuminate\Support\Facades\Storage;
                   use Illuminate\Support\Str;
               @endphp
@@ -181,12 +192,23 @@
                   </div>
               @endif
 
-            {{-- 詳細編集 --}}
-            <p>詳細:</p>
-            <textarea name="description" rows="5" style="width: 100%;">{{ $task->description }}</textarea>
+            </div>
+            <div class="task-content">
+              {{-- 詳細編集 --}}
+              <p>詳細:</p>
+              <textarea name="description" rows="5" style="width: 100%;">{{ $task->description }}</textarea>
 
-            <br><br>
+              <br><br>
+
+            </div>
             <button type="submit">更新</button>
+            
+
+          </div>
+            
+
+            
+            
         </form>
 
       </div>
@@ -244,4 +266,23 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeViewer();
   });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('status-select');
+    const dot = document.getElementById('status-dot');
+
+    function updateStatusColor() {
+      const status = select.value;
+
+      select.className = 'status';
+      dot.className = 'status-dot';
+
+      select.classList.add(status);
+      dot.classList.add(status);
+    }
+
+    select.addEventListener('change', updateStatusColor);
+    updateStatusColor();
+  });
+
 </script>
