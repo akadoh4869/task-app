@@ -132,6 +132,55 @@
   margin-left: -20px;
 }
 
+.assignable-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 1%;
+}
+
+/* ＋で追加する候補 */
+.assignee-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px dashed #bbb;
+  background: #fff;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.assignee-pill:hover {
+  background: #f7f7f7;
+  border-style: solid;
+}
+
+/* アイコン */
+.assignee-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* 名前 */
+.assignee-name {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* ＋マーク */
+.assignee-plus {
+  font-size: 16px;
+  font-weight: 600;
+  margin-left: 4px;
+  color: #3b82f6;
+}
+
+
 .remove-user{
   border: none;
   background: none;
@@ -324,4 +373,30 @@
   height:100%; 
   border:0; 
   background:#fff; 
+}
+
+.description,.renew{
+  margin-top: 3%;
+  border-radius: 10px;
+}
+
+.renew-button {
+  background: #fff;
+  color: #333;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  justify-content: center;
+}
+
+.renew-button:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.renew-button:active {
+  background: #eee;
 }
