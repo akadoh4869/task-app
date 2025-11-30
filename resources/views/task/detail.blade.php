@@ -80,7 +80,7 @@
                       $assignees = $task->assignedUsers; // 多対多: task_user
                   @endphp
 
-                  <div id="assignee-group" style="display:flex; flex-wrap:wrap; gap:15px;">
+                  <div id="assigned-user-list" style="display:flex; flex-wrap:wrap; gap:15px;">
                     @forelse ($assignees as $user)
                       @php
                           $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
@@ -104,24 +104,40 @@
 
                   <br>
 
-                  <p>メンバーを追加:</p>
-                  <select id="add-user-select" onchange="addSelectedUser()">
-                      <option value="">-- メンバーを選択 --</option>
-                      @foreach ($task->group->users as $user)
-                          @if (!$assignees->contains('id', $user->id))
-                              @php
-                                  $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
-                                      ? asset('storage/' . $user->avatar)
-                                      : asset('storage/images/default.png');
-                              @endphp
-                              <option value="{{ $user->id }}"
-                                      data-avatar="{{ $avatarPath }}"
-                                      data-name="{{ $user->user_name }}">
-                                  {{ $user->user_name }}
-                              </option>
-                          @endif
+                  @php
+                    // まだアサインされていないメンバーだけ抽出
+                    $addableUsers = $task->group->users->filter(function ($user) use ($assignees) {
+                      return !$assignees->contains('id', $user->id);
+                    });
+                  @endphp
+
+                  @if ($addableUsers->isNotEmpty())
+                    <p>メンバーを追加:</p>
+
+                    <div id="assignable-members" class="assignable-members">
+                      @foreach ($addableUsers as $user)
+                        @php
+                          $avatarPath = $user->avatar && file_exists(public_path('storage/' . $user->avatar))
+                              ? asset('storage/' . $user->avatar)
+                              : asset('storage/images/default.png');
+                        @endphp
+
+                        <button type="button"
+                                class="assignee-pill assignee-add"
+                                data-user-id="{{ $user->id }}"
+                                data-name="{{ $user->user_name }}"
+                                data-avatar="{{ $avatarPath }}">
+                          <img src="{{ $avatarPath }}" alt="{{ $user->user_name }}" class="assignee-avatar">
+                          <span class="assignee-name">{{ $user->user_name }}</span>
+                          <span class="assignee-plus">＋</span>
+                        </button>
                       @endforeach
-                  </select>
+                    </div>
+                  @endif
+
+
+
+
                 @endif
               </div>
      
@@ -194,11 +210,14 @@
 
             </div>
             <div class="task-content">
-              <textarea name="description" rows="5" style="width: 60%;" placeholder="　-内容-　">{{ $task->description }}</textarea>
+              <textarea name="description" class="description" rows="5" style="width: 60%;" placeholder="　-内容-　">{{ $task->description }}</textarea>
               <br><br>
 
             </div>
-            <button type="submit">更新</button>
+            <div class="renew">
+              <button type="submit" class="renew-button">更新</button>
+            </div>
+            
             
 
           </div>
@@ -217,7 +236,34 @@
 </body>
 </html>
 <script>
-  // 画像とPDFはモーダルで開く。それ以外はデフォルト遷移（新規タブにしたければ target="_blank" を付ける）
+  // ▼ × を押したときに担当メンバーから外す
+  function removeUser(button) {
+    // 自分が入っている assignee の箱を探す
+    const chip = button.closest('.assignee-item, .assigned-user');
+    if (!chip) return;
+
+    chip.remove();
+
+    // もし誰もいなくなったら「担当者なし」を表示したい場合
+    const assignedList = document.getElementById('assigned-user-list');
+    const stillExists  = assignedList?.querySelector('.assignee-item, .assigned-user');
+
+    if (!stillExists) {
+      let emptyLabel = document.getElementById('assigned-empty');
+      if (!emptyLabel) {
+        emptyLabel = document.createElement('div');
+        emptyLabel.id = 'assigned-empty';
+        emptyLabel.className = 'muted';
+        emptyLabel.textContent = '（担当者なし：共有）';
+        assignedList.appendChild(emptyLabel);
+      } else {
+        emptyLabel.style.display = 'block';
+      }
+    }
+  }
+
+  // ここから下に、元のモーダル・ステータスなどの処理を続ける
+  // 画像とPDFはモーダルで開く。それ以外はデフォルト遷移
   document.addEventListener('click', function(e){
     const a = e.target.closest('.attach-tile');
     if (!a) return;
@@ -235,14 +281,12 @@
   const content = document.getElementById('viewer-content');
 
   function openViewer(kind, url){
-    // 中身を入れ替え
     content.innerHTML = '';
     if (kind === 'image') {
       const img = new Image();
       img.src = url;
       content.appendChild(img);
     } else if (kind === 'pdf') {
-      // ブラウザのPDFビューワで表示
       const iframe = document.createElement('iframe');
       iframe.src = url;
       content.appendChild(iframe);
@@ -266,20 +310,57 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const select = document.getElementById('status-select');
-    const dot = document.getElementById('status-dot');
+    const dot    = document.getElementById('status-dot');
 
-    function updateStatusColor() {
-      const status = select.value;
+    if (select && dot) {
+      function updateStatusColor() {
+        const status = select.value;
 
-      select.className = 'status';
-      dot.className = 'status-dot';
+        select.className = 'status';
+        dot.className    = 'status-dot';
 
-      select.classList.add(status);
-      dot.classList.add(status);
+        select.classList.add(status);
+        dot.classList.add(status);
+      }
+
+      select.addEventListener('change', updateStatusColor);
+      updateStatusColor();
     }
 
-    select.addEventListener('change', updateStatusColor);
-    updateStatusColor();
-  });
+    // ＋でアサイン追加する処理もここに続けてOK（前回渡したやつ）
+    const assignedList       = document.getElementById('assigned-user-list');
+    const candidateContainer = document.getElementById('assignable-members');
 
+    function addAssignedChip(userId, name, avatar) {
+      if (!assignedList) return;
+
+      // 「担当者なし」のラベルがあれば隠す
+      const emptyLabel = document.getElementById('assigned-empty');
+      if (emptyLabel) emptyLabel.style.display = 'none';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'assignee-item';
+      wrapper.innerHTML = `
+        <img src="${avatar}" alt="${name}" class="assignee-avatar" width="30" height="30" style="border-radius:50%;">
+        <span class="assignee-name">${name}</span>
+        <input type="hidden" name="assigned_user_ids[]" value="${userId}">
+        <button type="button" class="remove-user" onclick="removeUser(this)">×</button>
+      `;
+      assignedList.appendChild(wrapper);
+    }
+
+    if (candidateContainer) {
+      candidateContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.assignee-add');
+        if (!btn) return;
+
+        const userId = btn.dataset.userId;
+        const name   = btn.dataset.name;
+        const avatar = btn.dataset.avatar;
+
+        addAssignedChip(userId, name, avatar);
+        btn.remove();
+      });
+    }
+  });
 </script>
