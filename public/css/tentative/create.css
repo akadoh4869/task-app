@@ -3,6 +3,120 @@
   margin-top: 3%;
 }
 
+.task-create{
+  margin-top: 3%;
+}
+.task-name{
+  border: none;
+  border-bottom: 2px solid gray;
+  font-size: 16px;
+  padding: 10px 15px;
+  width:30%;
+}
+
+.date{
+  margin: 3% 0% 0% 0%  ;
+  width: 15%;
+  padding: 10px 15px;
+  border: none;
+  border-bottom: 1.5px solid gray;
+}
+
+.task-belong{
+  margin-top: 3%;
+}
+
+.task-type {
+  appearance: none;        /* デフォルト矢印を消す（重要） */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 6px 40px 6px 12px;  /* ← 右だけ広く取る */
+  font-size: 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  /* オリジナル矢印の追加 */
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;  /* ← 矢印の位置を右に */
+  background-size: 18px;
+}
+
+
+.task-assignee{
+  margin-top: 3%;
+}
+
+.assignee-group {
+  display: flex;
+  flex-wrap: wrap;
+  /* gap: 10px 14px; */
+}
+
+/* 1人分の並び */
+.assignee-item {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 15px;
+  border: 1px solid gray;
+  border-radius: 35px;
+  padding: 10px 25px;
+  /* margin-top: 1%; */
+}
+
+.assignee-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #999;
+  border-radius: 50%;      /* ✅ ここで丸になる */
+  cursor: pointer;
+  position: relative;
+  margin-left: -10px;
+  margin-right: 10px;   /* ← ここで離す */
+}
+
+/* チェック時の中の● */
+.assignee-item input[type="checkbox"]:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.assignee-item input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+/* ✅ avatar と 名前 の距離を「近づける」 */
+.assignee-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.assignee-name {
+  font-size: 15px;
+  white-space: nowrap;
+  margin-left: -20px;
+}
+
+.task-content{
+  margin-top: 3%;
+}
+
 .image-grid{ 
   display:flex; 
   flex-wrap:wrap; 
@@ -11,16 +125,16 @@
 }
 
 .tile{ 
-  width:60px; 
-  height:75px; 
+  width:100px; 
+  height:125px; 
   position:relative; 
   display:inline-flex; 
   align-items:center; 
   justify-content:center; 
   background:#fff;
   border:1px dashed #bbb; 
+  border-radius: 10px;
   overflow:hidden; 
-  margin-left: 20%;
 }
 .thumb{ 
   width:100%; 
@@ -87,3 +201,36 @@
   cursor:pointer;
 }
 
+.memo,.description{
+  margin-top: 3%;
+  /* border: none; */
+  /* border-bottom: 2px solid gray; */
+  border-radius: 10px;
+}
+
+.create{
+  margin-top: 3%;
+}
+
+.create-button {
+  background: #fff;
+  color: #333;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  /* margin-left: 60%; */
+  /* text-align: center; */
+  justify-content: center;
+}
+
+.create-button:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.create-button:active {
+  background: #eee;
+}

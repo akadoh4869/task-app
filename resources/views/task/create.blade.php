@@ -35,51 +35,59 @@
     <main>
       <div class="main">
         <section class="content active">
-          <h2 class="title">新規タスク</h2>
 
           <form id="uploadForm" action="{{ route('task.store') }}" method="POST" enctype="multipart/form-data" onsubmit="event.preventDefault(); submitCompressedUploads();">
             @csrf
 
-            @php $groups = Auth::user()->groups; @endphp
+            @php
+             $groups = Auth::user()->groups; 
+            @endphp
 
-            <div class="flex2">
-              <label>タスクグループ:</label>
-              <select name="task_type_combined" id="task-type" onchange="toggleAssigneeSection()">
-                <option value="personal">個人タスク</option>
-                @foreach ($user->groups as $group)
-                  <option value="group_{{ $group->id }}">{{ $group->group_name }}</option>
-                @endforeach
-              </select>
+            <div class="task-create">
+              
+              <input type="text" id="task-name" name="task_name" class="task-name" placeholder="タスク名">
+              <br><br>
+          
 
-              <div id="assignee-section" style="display:none; margin-top:15px;">
-                <p>担当者を選択:</p>
-                @foreach ($user->groups as $group)
-                  <div class="assignee-group" data-group-id="{{ $group->id }}" style="display:none;">
-                    @foreach ($group->users as $member)
-                      <label style="margin-right:10px;">
-                        <input type="checkbox" name="assigned_user_ids[]" value="{{ $member->id }}">
-                        {{ $member->user_name }}
-                      </label>
+              <div class="task-date">
+                <input type="date" name="start_date" class="date" max="9999-12-31"> 〜
+                <input type="date" name="due_date" class="date" max="9999-12-31">
+              </div>
+
+              <br>
+
+              <div class="task-belong">
+                <div class="task-group">
+                  <select name="task_type_combined" id="task-type" class="task-type" onchange="toggleAssigneeSection()">
+                    <option value="personal">個人タスク</option>
+                    @foreach ($user->groups as $group)
+                      <option value="group_{{ $group->id }}">{{ $group->group_name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+
+                <div class="task-assignee">
+                  <div id="assignee-section" style="display:none; margin-top:15px;">
+                    @foreach ($user->groups as $group)
+                      <div class="assignee-group" data-group-id="{{ $group->id }}" style="display:none;">
+                        @foreach ($group->users as $member)
+                          @php
+                            $avatarPath = $member->avatar && file_exists(public_path('storage/' . $member->avatar))? asset('storage/' . $member->avatar): asset('storage/images/default.png');
+                          @endphp
+                          <label class="assignee-item">
+                            <input type="checkbox" name="assigned_user_ids[]" value="{{ $member->id }}">
+                            <img src="{{ $avatarPath }}" alt="{{ $member->user_name }}" class="assignee-avatar">
+                            <span class="assignee-name">{{ $member->user_name }}</span>
+                          </label>
+                        @endforeach
+                      </div>
                     @endforeach
                   </div>
-                @endforeach
+                </div>
+
               </div>
-            </div>
 
-            <br>
-
-            <input type="date" name="start_date" max="9999-12-31"> 〜
-            <input type="date" name="due_date" max="9999-12-31">
-
-            <br><br>
-
-            <input type="text" id="task-name" name="task_name" placeholder="タスク名">
-
-            <br><br>
-
-            <div class="flex4">
-              <div class="textarea-container">
-
+              <div class="task-content">
                 <!-- アップローダ -->
                 <div class="create-image" id="uploader">
                   <!-- 画像に限らず選べるように accept を緩める（必要なら特定拡張子に） -->
@@ -87,19 +95,28 @@
                   <div id="image-grid" class="image-grid"></div>
                 </div>
 
-                <!-- 上段メモ -->
-                <textarea name="memo" id="content" class="content" rows="5" cols="33" placeholder="メモ"></textarea>
+                {{-- <!-- 上段メモ -->
+                <textarea name="memo" id="content" class="memo" rows="5" style="width:60%" placeholder=" -メモ- "></textarea> --}}
+                <br>
+
+              
+                <textarea name="description" class="description" rows="5" style="width:60%;" placeholder=" -内容- "></textarea>
+
+
               </div>
+
+              <div class="create">
+                <button type="submit" class="create-button">作成</button>
+
+              </div>
+              
+
             </div>
 
-            <br>
+            
+           
 
-            <p>詳細:</p>
-            <textarea name="description" rows="5" style="width:100%;"></textarea>
-
-            <br><br>
-
-            <button type="submit" class="create-button">作成</button>
+            
           </form>
         </section>
 
