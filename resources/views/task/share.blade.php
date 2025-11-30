@@ -82,8 +82,8 @@
             <div class="tab-container">
               <div class="select-group">
                  <form method="GET" action="{{ route('task.share') }}">
-                    <label for="group_id">グループ選択：</label>
-                    <select name="group_id" id="group_id" onchange="this.form.submit()">
+                    <label for="group_id">グループ切替：</label>
+                    <select name="group_id" id="group_id" onchange="this.form.submit()" class="change">
                         @foreach ($groups as $group)
                             <option value="{{ $group->id }}" {{ $selectedGroupId == $group->id ? 'selected' : '' }}>
                                 {{ $group->group_name }}
@@ -286,8 +286,7 @@
                   <ul>
                     @forelse ($groupMembers as $member)
                       <li class="group-member-item">
-                        <img src="{{ asset($member->avatar ? 'storage/' . $member->avatar : 'storage/images/default.png') }}"
-                            alt="avatar" class="group-avatar">
+                        <img src="{{ asset($member->avatar ? 'storage/' . $member->avatar : 'storage/images/default.png') }}" alt="avatar" class="group-avatar">
 
                         <div class="group-member-info">
                           <span class="group-member-name">
@@ -299,9 +298,9 @@
                             <form method="POST" action="{{ route('group.leave', $selectedGroupId) }}">
                               @csrf
                               @method('DELETE')
-                              <button type="submit"
+                              <button type="submit" class="leave"
                                       onclick="return confirm('本当にこのグループを離脱しますか？')">
-                                グループを離脱
+                                退出↗
                               </button>
                             </form>
                           @endif
@@ -311,53 +310,64 @@
                       <li>メンバーがいません</li>
                     @endforelse
                   </ul>
+                  {{-- 招待中のユーザー --}}
+                      @if ($pendingInvitedUsers->isNotEmpty())
+                        <h6>招待中のユーザー</h6>
+                        <ul>
+                          @foreach ($pendingInvitedUsers as $invited)
+                            <li class="invite-member">
+                              <img src="{{ asset($invited->avatar ? 'storage/' . $invited->avatar : 'storage/images/default.png') }}" alt="avatar" class="invite-avatar">
+                              <span class="inviting-name">{{ $invited->user_name }}</span>
+                            </li>
+                          @endforeach
+                        </ul>
+                      @endif
 
                   {{-- ユーザー検索・招待フォーム --}}
-                  <form method="GET" action="{{ route('task.share') }}">
+                  <form method="GET" action="{{ route('task.share') }}" class="search-area">
                     <input type="hidden" name="group_id" value="{{ $selectedGroupId }}">
-                    <input type="text" name="search_user" placeholder="ユーザー名で検索" value="{{ request('search_user') }}">
-                    <button type="submit">検索</button>
+
+                    <input
+                      type="text"
+                      name="search_user"
+                      class="search-input"
+                      placeholder="ユーザー名で検索"
+                      value="{{ request('search_user') }}"
+                    >
+
+                    <button type="submit" class="search-button" aria-label="検索">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
                   </form>
 
                   {{-- 招待候補の表示 --}}
-                  @if ($inviteCandidates->isNotEmpty())
-                    <p>以下のユーザーを招待できます：</p>
-                    <ul>
-                      @foreach ($inviteCandidates as $candidate)
-                        <li>
-                          <img src="{{ asset($candidate->avatar ? 'storage/' . $candidate->avatar : 'storage/images/default.png') }}" alt="avatar" width="30" height="30" style="border-radius: 50%; vertical-align: middle; margin-right: 8px;">
-                          {{ $candidate->user_name }}
+                  <div class="invite-expectation">
+                      @if ($inviteCandidates->isNotEmpty())
+                        {{-- <p>以下のユーザーを招待できます：</p> --}}
+                        <ul>
+                          @foreach ($inviteCandidates as $candidate)
+                            <li class="invite-member">
+                              <img src="{{ asset($candidate->avatar ? 'storage/' . $candidate->avatar : 'storage/images/default.png') }}" alt="avatar" class="invite-avatar">
+                              <span class="candidate-name">{{ $candidate->user_name }}</span>
 
-                          @if ($pendingInvitedUserIds->contains($candidate->id))
-                            <span style="color: gray;">（招待中）</span>
-                          @else
-                            <form method="POST" action="{{ route('group.invite', $selectedGroupId) }}" style="display:inline;">
-                              @csrf
-                              <input type="hidden" name="user_id" value="{{ $candidate->id }}">
-                              <button type="submit">招待</button>
-                            </form>
-                          @endif
-                        </li>
-                      @endforeach
-                    </ul>
-                  @endif
+                              @if ($pendingInvitedUserIds->contains($candidate->id))
+                                <span style="color: gray;" class="inviting">（招待中）</span>
+                              @else
+                                <form method="POST" action="{{ route('group.invite', $selectedGroupId) }}" style="display:inline;">
+                                  @csrf
+                                  <input type="hidden" name="user_id" value="{{ $candidate->id }}">
+                                  <button type="submit" class="invite">招待</button>
+                                </form>
+                              @endif
+                            </li>
+                          @endforeach
+                        </ul>
+                      @endif
 
-                  {{-- 招待中のユーザー --}}
-                  @if ($pendingInvitedUsers->isNotEmpty())
-                    <h4>招待中のユーザー：</h4>
-                    <ul>
-                      @foreach ($pendingInvitedUsers as $invited)
-                        <li>
-                          <img src="{{ asset($invited->avatar ? 'storage/' . $invited->avatar : 'storage/images/default.png') }}" alt="avatar" width="30" height="30" style="border-radius: 50%; vertical-align: middle; margin-right: 8px;">
-                          {{ $invited->user_name }}
-                        </li>
-                      @endforeach
-                    </ul>
-                  @endif
+                      
+                    </div>
                 @endif
-
-              
-              
+   
             </section>
 
           </div>

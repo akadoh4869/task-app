@@ -40,25 +40,28 @@
 }
 
 .group > h6{
-  padding-left: 30px;
+  padding-left: 10px;
 }
 
 /* メンバー1行の横並び */
-.group-member-item {
+.group-member-item,.invite-member {
   display: flex;
   align-items: center;
-  gap: 2px;
+  /* gap: 2px; */
   margin: 0;
   height: 40px;
+  margin-left: -30px;
 }
 
 /* アイコン */
-.group-avatar {
+.group-avatar,.invite-avatar{
   width: 30px;
   height: 30px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: 8px;
 }
 
 /* 名前＋ボタン全体 */
@@ -69,9 +72,87 @@
 }
 
 /* 名前 */
-.group-member-name {
+.group-member-name,.inviting-name,.candidate-name{
   padding: 0;
   margin: 0;
   font-size: 13px;
   font-weight: 500;
+}
+
+/*切り替えボタン*/
+.change{
+  border: none;
+  border-bottom: 1.5px solid gray;
+  background: none;
+  
+
+}
+
+/* グループ離脱ボタン */
+.leave,.invite,.inviting {
+  background: none;      /* 背景なし */
+  border: none;          /* 枠なし */
+  padding: 0;            /* 余白なし */
+  margin-left: 6px;
+  font-size: 11px;       /* 小さめ文字 */
+  color: #e53935;        /* 赤文字 */
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ホバー時だけ少し濃く */
+.leave:hover,.invite:hover{
+  color: #b71c1c;
+  text-decoration: underline;
+}
+
+/* 検索全体の横並び */
+.search-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* input を下線だけにする */
+.search-input {
+  border: none;                     /* 枠をすべて消す */
+  border-bottom: 1px solid #ccc;    /* 下線だけ残す */
+  background: none;                 /* 背景なし */
+  padding: 4px 2px;
+  font-size: 13px;
+  outline: none;                    /* フォーカス時の青枠を消す */
+  width: 140px;                     /* お好みで調整 */
+}
+
+/* フォーカス時に下線を少し濃く */
+.search-input:focus {
+  border-bottom-color: #333;
+}
+
+/* 検索ボタン本体 */
+.search-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🔍 虫眼鏡アイコン自体のサイズをここで制御 */
+.search-button i {
+  font-size: 14px;   /* ← ここで確実に小さくなる */
+  color: #555;
+  line-height: 1;
+}
+
+/* ホバー時 */
+.search-button:hover i {
+  color: #000;
+}
+
+.invite-expectation{
+  margin-top: 15px;
+
 }

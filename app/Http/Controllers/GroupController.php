@@ -45,7 +45,7 @@ class GroupController extends Controller
 
     }
 
-     public function invite(Request $request, $groupId)
+    public function invite(Request $request, $groupId)
     {
         $group = Group::findOrFail($groupId);
 
