@@ -97,8 +97,6 @@
 
                 {{-- <!-- 上段メモ -->
                 <textarea name="memo" id="content" class="memo" rows="5" style="width:60%" placeholder=" -メモ- "></textarea> --}}
-                <br>
-
               
                 <textarea name="description" class="description" rows="5" style="width:60%;" placeholder=" -内容- "></textarea>
 
