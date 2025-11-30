@@ -1,3 +1,8 @@
+.main{
+  padding-left: 15%;
+  margin-top: 3%;
+}
+
 .tooltip-wrapper {
     position: relative;
     display: inline-block;
@@ -39,44 +44,143 @@
 }
 
 /* 横一列・60x75 統一・ツールチップは hover で表示 */
-.attach-strip{ display:flex; gap:12px; padding-left:0; margin:8px 0 0; flex-wrap:nowrap; overflow-x:auto; }
-.attach-strip li{ list-style:none; }
+.attach-strip{ 
+  display:flex; 
+  gap:12px; 
+  padding-left:0; 
+  margin:8px 0 0; 
+  flex-wrap:nowrap; 
+  overflow-x:auto; 
+}
+.attach-strip li{ 
+  list-style:none; 
+}
 
 /* overflow は visible（ツールチップを隠さない） */
 .attach-tile{
-  position:relative; display:block; width:60px; height:75px; text-decoration:none; color:inherit; overflow:visible;
+  position:relative; 
+  display:block; 
+  width:60px; 
+  height:75px; 
+  text-decoration:none; 
+  color:inherit; 
+  overflow:visible;
 }
 /* 角丸とクリップは内側の box に持たせる */
-.tile-box{ width:60px; height:75px; border:1px solid #ddd; border-radius:6px; overflow:hidden; background:#fff; }
-.tile-box img{ width:100%; height:100%; object-fit:cover; display:block; }
-.icon-60x75{ width:60px; height:75px; display:flex; align-items:center; justify-content:center; border:1px dashed #bbb; }
-.icon-60x75 i{ font-size:22px; opacity:.9; }
+.tile-box{ 
+  width:60px; 
+  height:75px; 
+  border:1px solid #ddd; 
+  border-radius:6px; 
+  overflow:hidden; 
+  background:#fff; 
+}
+.tile-box img{ 
+  width:100%; 
+  height:100%; 
+  object-fit:cover; 
+  display:block; 
+}
+.icon-60x75{ 
+  width:60px; 
+  height:75px; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  border:1px dashed #bbb; 
+}
+.icon-60x75 i{ 
+  font-size:22px; 
+  opacity:.9; 
+}
 
 /* ツールチップ（通常非表示、hover で表示） */
 .attach-tile .tt{
-  position:absolute; left:50%; bottom:100%; transform:translate(-50%,-8px);
-  max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  background:#333; color:#fff; font-size:11px; padding:4px 6px; border-radius:4px;
-  opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease; z-index:10;
+  position:absolute; 
+  left:50%; 
+  bottom:100%; 
+  transform:translate(-50%,-8px);
+  max-width:260px; 
+  white-space:nowrap; 
+  overflow:hidden; 
+  text-overflow:ellipsis;
+  background:#333; 
+  color:#fff; 
+  font-size:11px; 
+  padding:4px 6px; 
+  border-radius:4px;
+  opacity:0; 
+  pointer-events:none; 
+  transition:opacity .15s ease, transform .15s ease; 
+  z-index:10;
 }
+
 .attach-tile .tt::after{
-  content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%);
-  border-width:6px; border-style:solid; border-color:#333 transparent transparent transparent;
+  content:""; 
+  position:absolute; 
+  top:100%; 
+  left:50%; 
+  transform:translateX(-50%);
+  border-width:6px; 
+  border-style:solid; 
+  border-color:#333 transparent transparent transparent;
 }
-.attach-tile:hover .tt{ opacity:1; transform:translate(-50%,-12px); }
+
+.attach-tile:hover .tt{ 
+  opacity:1; 
+  transform:translate(-50%,-12px); 
+}
 
 /* モーダル */
-.viewer.hidden{ display:none; }
-.viewer{ position:fixed; inset:0; z-index:1000; }
-.viewer__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
+.viewer.hidden{ 
+  display:none; 
+}
+.viewer{ 
+  position:fixed; 
+  inset:0; 
+  z-index:1000; 
+}
+.viewer__backdrop{ 
+  position:absolute; 
+  inset:0; 
+  background:rgba(0,0,0,.55); 
+}
 .viewer__body{
-  position:relative; z-index:1; width:min(92vw,1100px); height:min(90vh,820px);
-  margin:5vh auto 0; background:#111; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.4);
-  display:flex; align-items:center; justify-content:center; padding:12px;
+  position:relative; 
+  z-index:1; 
+  width:min(92vw,1100px); 
+  height:min(90vh,820px);
+  margin:5vh auto 0; 
+  background:#111; 
+  border-radius:10px; 
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  padding:12px;
 }
+
 .viewer__close{
-  position:absolute; top:6px; right:8px; width:32px; height:32px; border:none; border-radius:6px;
-  background:#fff; font-size:18px; cursor:pointer;
+  position:absolute; 
+  top:6px; 
+  right:8px; 
+  width:32px; 
+  height:32px; 
+  border:none; 
+  border-radius:6px;
+  background:#fff; 
+  font-size:18px; 
+  cursor:pointer;
 }
-#viewer-content img{ max-width:100%; max-height:100%; display:block; }
-#viewer-content iframe{ width:100%; height:100%; border:0; background:#fff; }
+
+#viewer-content img{ 
+  max-width:100%; 
+  max-height:100%; 
+  display:block; 
+}
+#viewer-content iframe{ 
+  width:100%; 
+  height:100%; 
+  border:0; 
+  background:#fff; 
+}
