@@ -3,6 +3,147 @@
   margin-top: 3%;
 }
 
+.task-info{
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+}
+
+/* タイトル側はそのままでもOK（参考） */
+.task-name{
+  border: none;
+  border-bottom: 2px solid gray;
+  font-size: 16px;
+  padding: 0 15px 4px;
+  width: 30%;
+  margin: 20px 0 10px;
+}
+
+/* セレクト全体 */
+.task-status{
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+/* セレクト本体 */
+.status{
+  border: 1.5px solid gray;
+  border-radius: 999px;         /* ← 完全な丸枠 */
+  padding: 10px 30px 10px 30px;   /* ← ● のために左広め */
+  font-size: 15px;
+  background-color: #fff;
+  line-height: 1.2;             /* ← 潰れ防止 */
+  appearance: none;
+}
+
+/* ✅ ● を「完全な正円」に固定 */
+.status-dot{
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  aspect-ratio: 1 / 1;         /* ← ★ これが決定打 */
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: black;
+  pointer-events: none;
+  transform: translate3d(0, -50%, 0);
+  font-size: 5px;
+  margin-left: 0px;
+  padding-left: 20px;
+}
+
+.status{
+  padding-left: 45px;
+  padding-right: 20px;
+}
+
+/* ✅ 開いたときの選択肢は常に黒にする */
+.status option {
+  color: #000;
+}
+
+
+/* ステータス文字色 */
+.status.not_started{ color: black; }
+.status.in_progress{ color: #1e90ff; }
+.status.completed{ color: #2ecc71; }
+.status.overdue{ color: #e74c3c; }
+
+/* ● の色 */
+.status-dot.not_started{ background: black; }
+.status-dot.in_progress{ background: #1e90ff; }
+.status-dot.completed{ background: #2ecc71; }
+.status-dot.overdue{ background: #e74c3c; }
+
+
+.date{
+  margin: 3% 0% 0% 0%  ;
+  width: 20%;
+  padding: 10px 15px;
+  border: none;
+  border-bottom: 1.5px solid gray;
+}
+
+.task-belong{
+  margin-top: 3%;
+}
+
+.task-group p{
+  font-size: 18px;
+  display: inline-block;   /* ★ これが重要 */
+  width: auto;  
+
+}
+
+.task-group > p > span{
+  margin: 0;
+  margin-left: 15px;
+  padding: 0;
+  border-bottom: 1.5px solid gray; 
+
+}
+
+.assignee-item {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 10px;
+  border: 1px solid gray;
+  border-radius: 35px;
+  padding: 8px 25px;
+}
+
+/* ✅ avatar と 名前 の距離を「近づける」 */
+.assignee-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin-left: -10px;
+}
+
+.assignee-name {
+  font-size: 15px;
+  white-space: nowrap;
+  margin-left: -20px;
+}
+
+.remove-user{
+  border: none;
+  background: none;
+  font-size: 23px;
+  margin-left: 10px;
+}
+
+.remove-user:hover{
+  color: red;
+}
+
+
 .tooltip-wrapper {
     position: relative;
     display: inline-block;
