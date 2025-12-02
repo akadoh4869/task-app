@@ -1,19 +1,55 @@
-
 /* ===== mainエリアの調整 ===== */
-
-main {
-    position: relative;
-    z-index: 1;
+.main{
+  padding-left: 15%;
+  margin-top: 3%;
 }
 
-.setting-title {
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 40px;
-    color: #555;
+.setting-wrapper {
+  display: flex;
+  gap: 24px;
 }
 
-.setting-item {
+/* 左メニュー */
+.setting-container {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+/* 右の内容 */
+.setting-detail {
+  flex: 1;
+}
+
+/* パネルの表示/非表示 */
+.setting-panel {
+  display: none;
+}
+.setting-panel.active {
+  display: block;
+}
+
+/* 選択中メニューの見た目 */
+.setting-item.active {
+  background: #f0f0ff;
+  border-radius: 8px;
+}
+
+/* スマホ時は縦並び */
+@media (max-width: 768px) {
+  .setting-wrapper {
+    flex-direction: column;
+  }
+  .setting-container {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+  }
+  .setting-item {
+    flex: 1 0 auto;
+  }
+}
+
+/* .setting-item {
     display: flex;
     align-items: center;
     padding: 18px 0;
@@ -26,17 +62,20 @@ main {
     font-size: 26px;
     flex-shrink: 0;
     margin-left: 15%;
-}
+    color: transparent;
+    -webkit-text-stroke: 1.8px black;
+} */
 
-.overlay,
+
+/* .overlay,
 .fullscreen-modal {
-    position: absolute; /* ← fixedからabsoluteに */
+    position: absolute; 
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: white;
-    z-index: 10; /* 必要に応じて調整。headerより下になるとダメなのでheaderより上に */
+    z-index: 10; 
     overflow-y: auto;
 }
 
@@ -114,16 +153,16 @@ main {
     transform: translateX(-50%);
     width: 100%;
     z-index: 10;
-}
+} */
 
-#invitation-overlay {
+/* #invitation-overlay {
     position: fixed;
-    inset: 0; /* ← top, right, bottom, left を全部0に！ */
+    inset: 0; 
     background: white;
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* ← 上から並べるように！ */
+    justify-content: flex-start; 
     overflow-y: auto;
     z-index: 1000;
 }
@@ -132,7 +171,7 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* width: 100%; */
+    width: 100%;
 }
 
 #invitation-overlay .back-link {
@@ -144,7 +183,7 @@ main {
 
 #invitation-overlay .main {
     width: 100%;
-    height: auto; /* ← これ追加！高さ100%固定 */
+    height: auto; 
     margin: 0 auto;
     padding-top: 80px;
     padding-bottom: 120px;
@@ -155,14 +194,14 @@ main {
 }
 
 #invitation-overlay .content {
-    flex-grow: 1; /* ← 中身エリアを縦に伸ばす！ */
+    flex-grow: 1; 
     padding: 0 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* メール背景まとめ */
+
 .invitation-background-wrapper {
     position: relative;
     width: 90%;
@@ -170,7 +209,7 @@ main {
     margin-top: 30px;
 }
 
-/* メールアイコン */
+
 .invitation-icon {
     position: absolute;
     top: 50%;
@@ -193,7 +232,7 @@ main {
 
 }
 
-/* リスト本体 */
+
 .invitation-list {
     position: relative;
     z-index: 1;
@@ -205,12 +244,12 @@ main {
     margin-right: 5%;
 }
 
-/* 招待カード */
+
 .invitation-card {
     width: 100%;
     background: white;
     padding: 10px;
-    /* border-radius: 12px; */
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -250,12 +289,12 @@ main {
 
 #policy-overlay {
     position: fixed;
-    inset: 0; /* ← top, right, bottom, left を全部0に！ */
+    inset: 0; 
     background: white;
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* ← 上から並べるように！ */
+    justify-content: flex-start; 
     overflow-y: auto;
     z-index: 1000;
 }
@@ -273,7 +312,7 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* width: 100%; */
+    width: 100%;
 }
 
 #policy-overlay .back-link {
@@ -285,7 +324,7 @@ main {
 
 #policy-overlay .main {
     width: 100%;
-    height: auto; /* ← これ追加！高さ100%固定 */
+    height: auto; 
     margin: 0 auto;
     padding-top: 40px;
     padding-bottom: 120px;
@@ -296,14 +335,14 @@ main {
 }
 
 #policy-overlay .content {
-    flex-grow: 1; /* ← 中身エリアを縦に伸ばす！ */
+    flex-grow: 1; 
     padding: 0 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* タイトル（ストログ規約） */
+
 #policy-overlay .history-title {
     font-size: 22px;
     font-weight: bold;
@@ -312,11 +351,11 @@ main {
     margin-top: 0;
 }
 
-/* メニューリスト */
+
 .policy-menu {
     list-style: none;
     padding: 0;
-    margin: 0 auto; /* ←中央寄せ */
+    margin: 0 auto; 
     width: 100%;
 }
 
@@ -324,27 +363,27 @@ main {
     list-style: none;
 }
 
-/* メニュー項目 */
+
 .policy-menu li {
     font-weight: bold;
     font-size: 16px;
     cursor: pointer;
     color: #333;
-    /* border-bottom: 2px dotted #5ce0f0; */
+    border-bottom: 2px dotted #5ce0f0;
     padding: 10px 0;
     text-decoration: none;
     text-align: left;
     margin-top: 0;
 }
 
-/* バージョンだけ左右に分ける */
+
 .version-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* 右側のバージョン番号のスタイル */
+
 .version-number {
     font-size: 14px;
     color: #555;
@@ -352,10 +391,10 @@ main {
 }
 
 .fullscreen-modal {
-    display: flex;               /* ←ここを追加して */
+    display: flex;             
     flex-direction: column;
-    justify-content: flex-start; /* 上からスタートでもいい */
-    align-items: center;         /* ←ここ追加で中央に寄る！ */
+    justify-content: flex-start; 
+    align-items: center;         
     position: fixed;
     inset: 0;
     background: rgba(255, 255, 255, 0.95);
@@ -390,7 +429,7 @@ main {
 #withdraw-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5); /* 薄暗い背景に */
+    background: rgba(0, 0, 0, 0.5); 
     display: none;
     justify-content: center;
     align-items: center;
@@ -404,12 +443,12 @@ main {
     border-radius: 20px;
     text-align: center;
     width: 80%;
-    /* margin-left: 5%; */
+    margin-left: 5%;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     position: relative;
 }
 
-/* 閉じるボタン（✕） */
+
 #withdraw-modal .close {
     position: absolute;
     top: 15px;
@@ -420,28 +459,28 @@ main {
     cursor: pointer;
 }
 
-/* 見出し（h3） */
+
 #withdraw-modal h3 {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 15px;
 }
 
-/* メッセージ */
+
 #withdraw-modal .modal-scroll-content p {
     font-size: 14px;
     color: #555;
     margin-bottom: 20px;
 }
 
-/* ボタン2つ横並び */
+
 #withdraw-modal .confirm-buttons {
     display: flex;
     justify-content: center;
     gap: 10px;
 }
 
-/* ボタンデザイン */
+
 #withdraw-modal .confirm, 
 #withdraw-modal .cancel {
     padding: 10px 20px;
@@ -462,4 +501,4 @@ main {
     background: #5ce0f0;
     color: white;
 }
-
+ */

@@ -5,50 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@2.0.0/modern-normalize.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('css/tentative/edit.css')}}"/>
     <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
     <title>プロフィール編集ページ</title>
-
-    <style>
-        /* ===== 自前モーダル（Bootstrap衝突回避のため固有名） ===== */
-        .amodal-backdrop{
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.5);
-            display:none;
-            align-items:center;
-            justify-content:center;
-            z-index:3000;
-        }
-        .amodal-backdrop.is-open{ display:flex !important; }
-
-        .amodal{
-            background:#fff;
-            border-radius:12px;
-            width:min(560px,92vw);
-            padding:20px;
-            box-shadow:0 10px 30px rgba(0,0,0,.25);
-        }
-        .amodal header{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:12px;
-        }
-        .amodal .close{
-            background:none;
-            border:none;
-            font-size:24px;
-            line-height:1;
-            cursor:pointer;
-        }
-        .amodal .actions{
-            display:flex;
-            gap:8px;
-            justify-content:flex-end;
-            margin-top:16px;
-        }
-    </style>
+    <script src="{{ asset('js/tentative/edit.js') }}"></script>
 </head>
 <body>
 <div class="flex">
@@ -225,46 +189,5 @@
     </div>
 
 </div>
-
-{{-- ===== モーダル制御スクリプト（amodal版） ===== --}}
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // 開く
-    document.querySelectorAll('[data-modal-open]').forEach(btn => {
-        btn.addEventListener('click', e => {
-            e.preventDefault();
-            const id = btn.getAttribute('data-modal-open');
-            const el = document.getElementById(id);
-            if (el) el.classList.add('is-open');
-        });
-    });
-
-    // 閉じる（× / キャンセル）
-    document.querySelectorAll('[data-modal-close]').forEach(btn => {
-        btn.addEventListener('click', e => {
-            e.preventDefault();
-            const id = btn.getAttribute('data-modal-close');
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('is-open');
-        });
-    });
-
-    // 背景クリックで閉じる
-    document.querySelectorAll('.amodal-backdrop').forEach(backdrop => {
-        backdrop.addEventListener('click', e => {
-            if (e.target === backdrop) backdrop.classList.remove('is-open');
-        });
-    });
-
-    // ESCキーで全部閉じる
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.amodal-backdrop.is-open')
-                .forEach(el => el.classList.remove('is-open'));
-        }
-    });
-});
-</script>
-
 </body>
 </html>
