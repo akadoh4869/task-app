@@ -38,81 +38,112 @@
                 {{-- 目次 --}}
                 <div class="setting-wrapper">
                     <div class="setting-container">
-                        <div class="setting-item" data-panel="panel-default">
-                            <i class="fa-solid fa-gear"></i>
-                            <div class="setting-label">設定トップ</div>
+                        {{-- 大カテゴリ --}}
+                        <div class="setting-section-title">アカウント</div>
+                        {{-- アカウントメニュー --}}
+                        <div class="setting-item" data-panel="panel-profile-edit">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <div class="setting-label">プロフィール編集</div>
                         </div>
-                        <div class="setting-item" onclick="window.location.href='/account'">
-                            <i class="fa-solid fa-user"></i>
-                            <div class="setting-label">アカウント設定</div>
+                        <div class="setting-item" data-panel="panel-account-info">
+                            <i class="fa-solid fa-user" ></i>
+                            <div class="setting-label">アカウント情報</div>
                         </div>
-                
                         <div class="setting-item" data-panel="panel-invitations">
                             <i class="fa-solid fa-envelope"></i>
                             <div class="setting-label">招待一覧</div>
                         </div>
-                
-                        <div class="setting-item" data-panel="panel-policy">
-                            <i class="fa-solid fa-scroll"></i>
-                            <div class="setting-label">Task Me規約</div>
+                        <div class="setting-item" data-panel="panel-completed">
+                            <i class="fa-solid fa-star"></i>
+                            <div class="setting-label">完了タスク一覧</div>
                         </div>
-                
-                        <div class="setting-item" onclick="window.location.href='/contact'">
+                        <div class="setting-item" data-panel="panel-options">
+                            <i class="fa-solid fa-gem"></i>
+                            <div class="setting-label">有料オプション</div>
+                        </div>
+                        {{-- TaskMe規約 --}}
+                        <div class="setting-section-title">TaskMe規約</div>
+                        <div class="setting-item" data-panel="panel-terms">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <div class="setting-label">利用規約</div>
+                        </div>
+
+                        <div class="setting-item" data-panel="panel-privacy">
+                            <i class="fa-solid fa-user-lock"></i>
+                            <div class="setting-label">プライバシーポリシー</div>
+                        </div>
+
+                        <div class="setting-item" data-panel="panel-copyright">
+                            <i class="fa-solid fa-copyright"></i>
+                            <div class="setting-label">著作権情報</div>
+                        </div>
+                        {{-- 🔽 ここがバージョン表示（クリックしても何も起きない） --}}
+                        <div class="setting-item setting-item-static">
+                            <i class="fa-solid fa-code-branch"></i>
+                            <div class="setting-label">
+                                バージョン
+                                <span class="setting-subtext">1.0.0</span>
+                            </div>
+                        </div>
+                        {{-- キャッシュ・ログアウト・退会 --}}
+                        <div class="setting-group-title">その他</div>
+                        <div class="setting-item" data-panel="panel-cache">
+                            <i class="fa-solid fa-broom"></i>
+                            <div class="setting-label">キャッシュクリア</div>
+                        </div>
+
+                        <div class="setting-item" data-panel="panel-contact">
                             <i class="fa-solid fa-comments"></i>
                             <div class="setting-label">お問い合せ</div>
                         </div>
-                
+
+                        <div class="setting-item"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <div class="setting-label">ログアウト</div>
+                        </div>
+
                         <div class="setting-item" data-panel="panel-withdraw">
                             <i class="fa-solid fa-hand"></i>
                             <div class="setting-label">退会する</div>
                         </div>
 
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                            @csrf
+                        </form>
+
                         @if(Auth::user() && Auth::user()->is_admin)
-                            <div class="setting-item" onclick="window.location.href='/admin'">
+                            <div class="setting-item" data-panel="panel-admin">
                                 <i class="fa-solid fa-user-shield"></i>
                                 <div class="setting-label">管理者ページ</div>
                             </div>
                         @endif
 
                     </div>
-
+                    {{-- ✅ 右側：表示エリア（ここに @include を書く） --}}
                     <div class="setting-detail">
-                        <!-- オーバーレイ（フルスクリーンページ風） -->
-                        <section id="panel-default" class="setting-panel active">
+
+                        {{-- 初期表示 --}}
+                        {{-- <section id="panel-default" class="setting-panel active">
                             <h3>設定トップ</h3>
-                            <p>左のメニューから項目を選んでください。</p>
-                        </section>
-                        {{-- 招待関係 --}}
-                        <section id="panel-invitations" class="setting-panel">
-                            <div class="history-title">保留中招待一覧</div>
-                            <div class="invitation-icon">
-                                <i class="fa-solid fa-envelope"></i>
-                            </div>
-                            @if($pendingInvitations->isEmpty())
-                                <p style="text-align: center; margin-top: 50px;">保留中のグループ招待はありません。</p>
-                            @else
-                                <div class="invitation-list">
-                                    @foreach($pendingInvitations as $invitation)
-                                        <div class="invitation-card">
-                                            <div class="invitation-text">
-                                                {{ $invitation->group->group_name }}
-                                            </div>
-                                            <div class="invitation-buttons">
-                                                <form action="{{ route('invitation.respond') }}" method="POST" style="display: flex; gap: 10px;">
-                                                    @csrf
-                                                    <input type="hidden" name="invitation_id" value="{{ $invitation->id }}">
-                                                    @if($totalSpaceCount < 3)
-                                                        <button class="accept-btn" name="response" value="accept">参加</button>
-                                                    @endif
-                                                    <button class="decline-btn" name="response" value="decline">辞退</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </section>
-                        <!-- 規約 -->
+                            <p>左のメニューから項目を選択してください。</p>
+                        </section> --}}
+
+                        {{-- ✅ アカウント系 --}}
+                        @include('partials.account')
+
+                        {{-- ✅ 規約系 --}}
+                        @include('partials.policy')
+
+                        {{-- ✅ その他 --}}
+                        @include('partials.others')
+
+                    </div>
+
+                </div>
+
+    
+                <!-- 規約 -->
                         <section id="panel-policy" class="setting-panel">
                             <div class="history-title" style="margin-top: 20px;">Task Me規約</div>
                             <ul class="policy-menu">
