@@ -255,7 +255,7 @@
                         <h3>完了タスク一覧</h3>
 
                         <!-- プルダウン切り替え -->
-                        <form method="GET" action="{{ route('account.index') }}">
+                        <form method="GET" action="{{ route('setting.index') }}">
                             <label for="task_scope">表示対象：</label>
                             <select name="task_scope" id="task_scope" onchange="this.form.submit()">
                                 <option value="all" {{ $selectedScope === 'all' ? 'selected' : '' }}>すべて</option>
