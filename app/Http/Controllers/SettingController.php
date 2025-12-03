@@ -4,28 +4,100 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Task;
 use App\Models\GroupInvitation;
 
 
 
 class SettingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
-        // 招待一覧（保留中）
+        // ▼ 所属グループ一覧
+        $groups = $user->groups()->orderBy('created_at')->get();
+
+        // ▼ 招待一覧（保留中）
         $pendingInvitations = GroupInvitation::where('invitee_id', $user->id)
             ->where('status', 'pending')
             ->with('group')
             ->get();
 
-        // 所属しているスペースの数（例：3つまでしか参加できないなどのロジック用）
+        // ▼ 所属しているスペースの数（例：3つまでしか参加できないなどのロジック用）
         $totalSpaceCount = $user->groups()->count();
 
+        // ▼ 完了タスク表示範囲（account.index でやっていた処理をそのまま移植）
+        $selected = $request->input('task_scope');
+        if ($selected !== null) {
+            // ドロップダウンで選ばれたらセッションに保存
+            session(['selected_task_scope' => $selected]);
+        } else {
+            // 何も来ていないときは前回値 or デフォルト personal
+            $selected = session('selected_task_scope', 'personal');
+        }
+
+        $completedTasks = collect();
+
+        if ($selected === 'all') {
+            // 個人（作成＋アサイン）＋ 所属グループ（全タスク）
+            $createdTasks  = $user->createdTasks;
+            $assignedTasks = $user->assignedTasks;
+
+            $groupTasks = Task::whereIn('group_id', $groups->pluck('id'))
+                ->where('status', 'completed')
+                ->with('group')
+                ->get();
+
+            $completedTasks = $createdTasks
+                ->merge($assignedTasks)
+                ->merge($groupTasks)
+                ->unique('id')
+                ->filter(fn($task) => $task->status === 'completed')
+                ->sortByDesc('due_date');
+
+        } elseif ($selected === 'personal') {
+            // 個人タスク（グループなし）
+            $createdTasks  = $user->createdTasks->filter(fn($task) => $task->group_id === null);
+            $assignedTasks = $user->assignedTasks->filter(fn($task) => $task->group_id === null);
+
+            $completedTasks = $createdTasks
+                ->merge($assignedTasks)
+                ->unique('id')
+                ->filter(fn($task) => $task->status === 'completed')
+                ->sortByDesc('due_date');
+
+        } elseif (is_numeric($selected)) {
+            // 指定グループの全完了タスク（アサイン無関係）
+            $groupId = (int) $selected;
+
+            if ($groups->pluck('id')->contains($groupId)) {
+                $completedTasks = Task::where('group_id', $groupId)
+                    ->where('status', 'completed')
+                    ->with('group')
+                    ->orderByDesc('due_date')
+                    ->get();
+            }
+        }
+
+        // ✅ 「完了タスクのプルダウンを選んだときは、自動で完了パネルを開きたい」
+        // という用途があれば使うフラグ（いらなければ削ってOK）
+        $showCompletedOverlay = false;
+        if ($request->has('task_scope')) {
+            $showCompletedOverlay = true;
+        }
+
         return view('setting', [
-            'pendingInvitations' => $pendingInvitations,
-            'totalSpaceCount' => $totalSpaceCount,
+            // ★ もともとの setting.blade で使っていた変数
+            'pendingInvitations'   => $pendingInvitations,
+            'totalSpaceCount'      => $totalSpaceCount,
+
+            // ★ account.blade で使っていた変数たち（いまは setting.blade + partials で使う）
+            'user'                 => $user,
+            'groups'               => $groups,
+            'selectedScope'        => $selected,
+            'completedTasks'       => $completedTasks,
+            'showCompletedOverlay' => $showCompletedOverlay,
         ]);
     }
 }

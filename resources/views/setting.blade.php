@@ -7,6 +7,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @vite(['resources/sass/app.scss', 'resources/js/app.js'])
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@2.0.0/modern-normalize.min.css">
   <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/tentative/setting.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>

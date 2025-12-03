@@ -13,11 +13,6 @@ use App\Http\Controllers\GroupInvitationController;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
 Route::get('/', function () {
@@ -26,87 +21,81 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// ホーム
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-Route::get('/task',function(){
-    return view('task/task');
-});
-// routes/web.php
+// ==============================
+// タスク関連
+// ==============================
 
-Route::get('/task', [App\Http\Controllers\TaskController::class, 'index'])->name('task.task');
+// タスク一覧（メイン）
+Route::get('/task', [TaskController::class, 'index'])->name('task.task');
 
+// タスク作成
 Route::get('/create', [TaskController::class, 'create'])->name('tasks.create');
-
-
-// Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
 Route::post('/task', [TaskController::class, 'store'])->name('task.store');
 
-
+// タスク詳細・更新
 Route::get('/detail', [TaskController::class, 'detail'])->name('tasks.detail');
 Route::get('/task/detail/{id}', [TaskController::class, 'detail'])->name('task.detail');
-
 Route::patch('/task/{id}/status', [TaskController::class, 'updateStatus'])->name('task.updateStatus');
-
 Route::patch('/task/{id}/detail', [TaskController::class, 'updateDetail'])->name('task.updateDetail');
 
+// 完了タスクの復元
+Route::post('/tasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore');
 
+// ==============================
+// グループ・共有関連
+// ==============================
+
+// グループ別タスク一覧
 Route::get('/task/share', [TaskController::class, 'share'])->name('task.share');
-// Route::get('/share', [TaskController::class, 'share'])->name('tasks.share');
+
+// グループ作成
 Route::get('/group/create', [GroupController::class, 'create'])->name('group.create');
+Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
 
+// グループ招待
+Route::post('/group/{group}/invite', [GroupController::class, 'invite'])->name('group.invite');
+Route::post('/invitation/respond', [GroupController::class, 'respond'])->name('invitation.respond');
 
+// グループ離脱
+Route::delete('/group/{group}/leave', [GroupController::class, 'leave'])->name('group.leave');
 
-Route::get('/group/create', [GroupController::class, 'create'])->name('group.create');
-
-
-Route::get('/setting',function(){
-    return view('setting');
-});
-
-Route::get('/test',function(){
-    return view('test');
-});
-
-Route::get('/test', [App\Http\Controllers\HomeController::class, 'test'])->name('test');
+// ==============================
+// 管理者ページ
+// ==============================
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', function () {
         return view('admin.index');
     })->name('admin.index');
 });
-Route::middleware(['auth'])->group(function () {
-    Route::get('/account', function () {
-        return view('users.account');
-    })->name('account.settings');
-});
-// Route::middleware(['auth'])->get('/account', [UserController::class, 'account'])->name('account.settings');
-Route::middleware(['auth'])->get('/account', [UserController::class, 'index'])->name('account.index');
 
-Route::post('/tasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore');
+// ==============================
+// 設定ページ（今回のメイン）
+// ==============================
+//
+// ここで SettingController@index が
+//   - $user
+//   - $groups
+//   - $completedTasks
+//   - $selectedScope
+//   - $pendingInvitations / $totalSpaceCount
+// などをまとめて View に渡します。
+//
+Route::middleware('auth')->get('/setting', [SettingController::class, 'index'])->name('setting.index');
 
-
-Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
-Route::post('/group/{group}/invite', [GroupController::class, 'invite'])->name('group.invite');
-
-Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
-
-
-
-
-    // routes/web.php にあるか？（絶対に api.php ではダメ）
-Route::post('/invitation/respond', [GroupController::class, 'respond'])->name('invitation.respond');
-
-// グループ離脱ルート（ユーザー本人のみアクセス可）
-Route::delete('/group/{group}/leave', [GroupController::class, 'leave'])->name('group.leave');
- 
+// ==============================
+// プロフィール編集系（フォーム送信先）
+// ※ 画面は /setting 内の panel-profile-edit で表示
+// ==============================
 Route::middleware('auth')->group(function () {
-    // 表示
-    Route::get('/users/edit', [UserController::class, 'edit'])->name('users.edit');
-
-    // 通常更新（表示名・アイコン）
+    // 表示名・アイコンの更新
     Route::patch('/users', [UserController::class, 'update'])->name('users.update');
 
-    // 個別変更（モーダルから送信）
+    // 個別変更（モーダルから）
     Route::patch('/users/email',    [UserController::class, 'updateEmail'])->name('users.updateEmail');
     Route::patch('/users/username', [UserController::class, 'updateUserName'])->name('users.updateUserName');
     Route::patch('/users/password', [UserController::class, 'updatePassword'])->name('users.updatePassword');
 });
+
