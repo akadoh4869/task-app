@@ -82,7 +82,23 @@ class UserController extends Controller
         return back()->with('success', 'パスワードを変更しました。');
     }
 
+    public function withdraw(Request $request)
+    {
+        $user = Auth::user();
+
+        // ✅ ログアウト処理
+        Auth::logout();
+
+        // ✅ セッション破棄
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // ✅ ユーザー削除（完全削除）
+        $user->delete();
+
+        // ✅ トップページ or ログイン画面へリダイレクト
+        return redirect('/')->with('status', '退会が完了しました。');
+    }
+
      
-
-
 }

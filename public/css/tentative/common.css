@@ -14,30 +14,30 @@
   margin: 0%;
 }
 
-/* .sidebar{
-  width: 20%;
-  z-index: 5;
- 
-} */
-
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
   width: var(--sidebar-width);
   height: 100%;
-  z-index: 5;
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  /* 背景色などお好みで */
-  /* background-color: #fff; */
+  background-color: transparent;
+  transition: background-color .3s ease;
 }
+
+/* ✅ 文字が出るタイミングで白に */
+.sidebar:hover {
+  background-color: #fff;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+}
+
 
 
 /* // 🟩 透明な「hover検知ゾーン」を設置 */
 .sidebar-hover-zone {
   width: 15%; 
-  
   /* height: 100%; */
 }
 

@@ -99,3 +99,4 @@ Route::middleware('auth')->group(function () {
     Route::patch('/users/password', [UserController::class, 'updatePassword'])->name('users.updatePassword');
 });
 
+Route::post('/withdraw', [UserController::class, 'withdraw'])->name('withdraw');

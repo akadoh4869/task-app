@@ -84,56 +84,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-
 // -------------------------------
-// ✅ 従来型 オーバーレイ（規約・著作権など）
-// -------------------------------
-function openOverlay(id) {
-  document.querySelectorAll('.overlay').forEach(modal => {
-    modal.style.display = 'none';
-  });
-
-  const target = document.getElementById(id);
-  if (target) {
-    target.style.display = 'flex';
-  }
-}
-
-function closeOverlay(id) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.style.display = 'none';
-  }
-}
-
-
-// -------------------------------
-// ✅ PWAキャッシュクリア
+// ✅ PWAキャッシュクリア（非同期 / リロードなし / 再実行OK）
 // -------------------------------
 function clearAppCache() {
   const clearButton = document.getElementById('clear-cache-btn');
   if (!clearButton) return;
 
-  clearButton.onclick = null;
-
-  if ('caches' in window) {
-    caches.keys()
-      .then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
-        );
-      })
-      .then(() => {
-        console.log('キャッシュクリア完了');
-
-        clearButton.textContent = 'キャッシュクリア完了しました';
-        clearButton.style.pointerEvents = 'none';
-        clearButton.style.color = '#999';
-      })
-      .catch(error => {
-        console.error('キャッシュクリア失敗:', error);
-      });
-  } else {
-    console.error('キャッシュAPIがサポートされていません');
+  // 連打防止（実行中だけ）
+  if (clearButton.dataset.loading === '1') {
+    return;
   }
+  clearButton.dataset.loading = '1';
+
+  const originalText = clearButton.textContent;
+  clearButton.disabled = true;
+  // clearButton.textContent = 'キャッシュクリア中...';
+
+  if (!('caches' in window)) {
+    console.error('キャッシュAPIがサポートされていません');
+    alert('このブラウザではキャッシュクリア機能が利用できません。');
+    clearButton.disabled = false;
+    clearButton.textContent = originalText;
+    clearButton.dataset.loading = '0';
+    return;
+  }
+
+  caches.keys()
+    .then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+    })
+    .then(() => {
+      console.log('キャッシュクリア完了');
+      // 完了メッセージ（お好みで調整して OK）
+      // alert('キャッシュをクリアしました。');
+
+      clearButton.textContent = 'キャッシュクリア完了';
+
+      // 0.3秒くらい表示したあと元の文言に戻す
+      setTimeout(() => {
+        clearButton.textContent = originalText;
+      }, 300);
+    })
+    .catch(error => {
+      console.error('キャッシュクリア失敗:', error);
+      alert('キャッシュクリアに失敗しました。');
+
+      // 失敗した場合はテキストを元に戻す
+      clearButton.textContent = originalText;
+    })
+    .finally(() => {
+      clearButton.disabled = false;
+      clearButton.dataset.loading = '0';
+    });
 }
