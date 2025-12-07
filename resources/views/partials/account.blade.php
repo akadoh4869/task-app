@@ -170,25 +170,25 @@
 {{-- ➁アカウント情報 --}}
 <section id="panel-account-info" class="setting-panel">
     <!-- アカウント設定オーバーレイ -->
-                <div id="account-overlay" class="overlay">
-                    <div class="overlay-content">
-                        <span class="close-btn" onclick="closeOverlay('account-overlay')">&times;</span>
-                        <h3>アカウント情報</h3>
-                        <p>ユーザーネーム: <strong>{{ $user->user_name }}</strong></p>
-                        <p>アカウント名:   <strong>{{ $user->name }}</strong></p>
-                        <p>メールアドレス: <strong>{{ $user->email }}</strong></p>
-                        <p>会員ステータス:
-                        <strong>
-                            @if($user->subscription_status)
-                            有料会員（買い切り）
-                            @else
-                            無料会員
-                            @endif
-                        </strong>
-                        </p>
+    <div id="account-overlay" class="overlay">
+        <div class="overlay-content">
+            <span class="close-btn" onclick="closeOverlay('account-overlay')">&times;</span>
+            <h3>アカウント情報</h3>
+            <p>ユーザーネーム: <strong>{{ $user->user_name }}</strong></p>
+            <p>アカウント名:   <strong>{{ $user->name }}</strong></p>
+            <p>メールアドレス: <strong>{{ $user->email }}</strong></p>
+            <p>会員ステータス:
+            <strong>
+                @if($user->subscription_status)
+                有料会員（買い切り）
+                @else
+                無料会員
+                @endif
+            </strong>
+            </p>
 
-                    </div>
-                </div>
+        </div>
+    </div>
 
 </section>
 
