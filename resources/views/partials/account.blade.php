@@ -14,7 +14,7 @@
 {{-- ➀プロフィール編集 --}}
 <section id="panel-profile-edit" class="setting-panel">
     <!-- メイン -->
-    <main style="flex:1; padding:20px; max-width:720px; margin:auto;">
+    <main class="panel-inner">
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -170,7 +170,7 @@
 {{-- ➁アカウント情報 --}}
 <section id="panel-account-info" class="setting-panel">
     <!-- アカウント設定オーバーレイ -->
-    <div id="account-overlay" class="overlay">
+    <main class="panel-inner">
         <div class="overlay-content">
             <span class="close-btn" onclick="closeOverlay('account-overlay')">&times;</span>
             <h3>アカウント情報</h3>
@@ -188,115 +188,124 @@
             </p>
 
         </div>
-    </div>
+    </main>
 
 </section>
 
 
 {{-- ➂招待一覧 --}}
 <section id="panel-invitations" class="setting-panel">
+    <main class="panel-inner">
 
-    <div class="history-title">保留中招待一覧</div>
+        <div class="history-title">保留中招待一覧</div>
 
-    <div class="invitation-icon">
-        <i class="fa-solid fa-envelope"></i>
-    </div>
-
-    @if($pendingInvitations->isEmpty())
-        <p style="text-align: center; margin-top: 50px;">
-            保留中のグループ招待はありません。
-        </p>
-    @else
-        <div class="invitation-list">
-            @foreach($pendingInvitations as $invitation)
-                <div class="invitation-card">
-
-                    <div class="invitation-text">
-                        {{ $invitation->group->group_name }}
-                    </div>
-
-                    <div class="invitation-buttons">
-                        <form action="{{ route('invitation.respond') }}" method="POST"
-                              style="display: flex; gap: 10px;">
-                            @csrf
-
-                            <input type="hidden" name="invitation_id"
-                                   value="{{ $invitation->id }}">
-
-                            @if($totalSpaceCount < 3)
-                                <button class="accept-btn"
-                                        name="response"
-                                        value="accept">
-                                    参加
-                                </button>
-                            @endif
-
-                            <button class="decline-btn"
-                                    name="response"
-                                    value="decline">
-                                辞退
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            @endforeach
+        <div class="invitation-icon">
+            <i class="fa-solid fa-envelope"></i>
         </div>
-    @endif
+
+        @if($pendingInvitations->isEmpty())
+            <p style="text-align: center; margin-top: 50px;">
+                保留中のグループ招待はありません。
+            </p>
+        @else
+            <div class="invitation-list">
+                @foreach($pendingInvitations as $invitation)
+                    <div class="invitation-card">
+
+                        <div class="invitation-text">
+                            {{ $invitation->group->group_name }}
+                        </div>
+
+                        <div class="invitation-buttons">
+                            <form action="{{ route('invitation.respond') }}" method="POST"
+                                style="display: flex; gap: 10px;">
+                                @csrf
+
+                                <input type="hidden" name="invitation_id"
+                                    value="{{ $invitation->id }}">
+
+                                @if($totalSpaceCount < 3)
+                                    <button class="accept-btn"
+                                            name="response"
+                                            value="accept">
+                                        参加
+                                    </button>
+                                @endif
+
+                                <button class="decline-btn"
+                                        name="response"
+                                        value="decline">
+                                    辞退
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
+    </main>
+
+    
 
 </section>
 
 {{-- ➃完了タスク一覧 --}}
 <section id="panel-completed" class="setting-panel">
-     <!-- 完了タスク一覧オーバーレイ -->
-                <div id="completed-tasks-overlay" class="overlay">
-                    <div class="overlay-content">
-                        <span class="close-btn" onclick="closeOverlay('completed-tasks-overlay')">&times;</span>
-                        <h3>完了タスク一覧</h3>
+    <main class="panel-inner">
+        <!-- 完了タスク一覧オーバーレイ -->
+        <div id="completed-tasks-overlay" class="overlay">
+            <div class="overlay-content">
+                <span class="close-btn" onclick="closeOverlay('completed-tasks-overlay')">&times;</span>
+                <h3>完了タスク一覧</h3>
 
-                        <!-- プルダウン切り替え -->
-                        <form method="GET" action="{{ route('setting.index') }}">
-                            <label for="task_scope">表示対象：</label>
-                            <select name="task_scope" id="task_scope" onchange="this.form.submit()">
-                                <option value="all" {{ $selectedScope === 'all' ? 'selected' : '' }}>すべて</option>
-                                <option value="personal" {{ $selectedScope === 'personal' ? 'selected' : '' }}>個人タスク</option>
-                                @foreach ($groups as $group)
-                                    <option value="{{ $group->id }}" {{ $selectedScope == $group->id ? 'selected' : '' }}>
-                                        {{ $group->group_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </form>
+                <!-- プルダウン切り替え -->
+                <form method="GET" action="{{ route('setting.index') }}">
+                    <label for="task_scope">表示対象：</label>
+                    <select name="task_scope" id="task_scope" onchange="this.form.submit()">
+                        <option value="all" {{ $selectedScope === 'all' ? 'selected' : '' }}>すべて</option>
+                        <option value="personal" {{ $selectedScope === 'personal' ? 'selected' : '' }}>個人タスク</option>
+                        @foreach ($groups as $group)
+                            <option value="{{ $group->id }}" {{ $selectedScope == $group->id ? 'selected' : '' }}>
+                                {{ $group->group_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
 
-                        <div class="modal-scroll-content">
-                            @if($completedTasks->isEmpty())
-                                <p>完了タスクはありません。</p>
-                            @else
-                                <ul style="list-style: none; padding: 0;">
-                                    @foreach($completedTasks as $task)
-                                        <li style="margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
-                                            <strong>{{ $task->task_name }}</strong><br>
-                                            期限：{{ optional($task->due_date)->format('Y-m-d') ?? '未設定' }}<br>                      
-                                            @if($task->group_id !== null)
-                                                グループ：{{ optional($task->group)->group_name ?? '不明' }}<br>
-                                                担当者：
-                                                @if($task->assignedUsers->isNotEmpty())
-                                                    {{ $task->assignedUsers->pluck('name')->join('、') }}
-                                                @else
-                                                    なし
-                                                @endif
-                                                <br>
-                                            @endif
-                                            <!-- ✅ 復元ボタン（フォーム） -->
-                                            <form method="POST" action="{{ route('tasks.restore', $task->id) }}" style="margin-top: 8px;">
-                                                @csrf
-                                                <button type="submit" class="restore-btn" style="padding: 4px 8px; font-size: 0.9em;">復元する</button>
-                                            </form>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </div>
-                    </div>
+                <div class="modal-scroll-content">
+                    @if($completedTasks->isEmpty())
+                        <p>完了タスクはありません。</p>
+                    @else
+                        <ul style="list-style: none; padding: 0;">
+                            @foreach($completedTasks as $task)
+                                <li style="margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                                    <strong>{{ $task->task_name }}</strong><br>
+                                    期限：{{ optional($task->due_date)->format('Y-m-d') ?? '未設定' }}<br>                      
+                                    @if($task->group_id !== null)
+                                        グループ：{{ optional($task->group)->group_name ?? '不明' }}<br>
+                                        担当者：
+                                        @if($task->assignedUsers->isNotEmpty())
+                                            {{ $task->assignedUsers->pluck('name')->join('、') }}
+                                        @else
+                                            なし
+                                        @endif
+                                        <br>
+                                    @endif
+                                    <!-- ✅ 復元ボタン（フォーム） -->
+                                    <form method="POST" action="{{ route('tasks.restore', $task->id) }}" style="margin-top: 8px;">
+                                        @csrf
+                                        <button type="submit" class="restore-btn" style="padding: 4px 8px; font-size: 0.9em;">復元する</button>
+                                    </form>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
+            </div>
+        </div>
+
+    </main>
+    
 </section>

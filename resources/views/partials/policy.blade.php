@@ -1,6 +1,6 @@
 {{-- ➀利用規約パネル --}}
 <section id="panel-terms" class="setting-panel">
-    <main style="flex:1; padding:20px; max-width:720px; margin:auto;">
+    <main class="panel-inner">
         <h2 class="terms">利用規約</h2>
         <div class="scroll-content">
             <p>
@@ -132,7 +132,7 @@
 
 {{-- ➁プライバシーポリシー --}}
 <section class="setting-panel" id="panel-privacy">
-    <main style="flex: 1; padding:20px; max-width:720px; margin:auto;">
+    <main class="panel-inner">
         <h2 class="terms">プライバシーポリシー</h2>
         <div class="scroll-content">
             <p>
@@ -223,7 +223,7 @@
 
 {{-- ➂著作権情報 --}}
 <section class="setting-panel" id="panel-copyright">
-    <main style="flex: 1; padding:20px; max-width:720px; margin:auto;">
+    <main class="panel-inner">
         <h2 class="terms">著作権情報</h2>
         <div class="scroll-content">
             <p>

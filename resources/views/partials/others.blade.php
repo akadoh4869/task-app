@@ -1,6 +1,6 @@
 {{-- ➀ キャッシュクリア --}}
 <section id="panel-cache" class="setting-panel">
-    <main style="flex:1; padding:20px; max-width:720px; margin:auto;">
+    <main class="panel-inner">
         <h2 class="others">キャッシュクリア</h2>
         <p>
             Task Me 内のキャッシュを削除します。<br>
@@ -20,7 +20,7 @@
 
 {{-- ➁退会パネル --}}
 <section id="panel-withdraw" class="setting-panel">
-    <main style="flex:1; padding:20px; max-width:720px; margin:auto;">
+    <main class="panel-inner">
         <h2 class="others">退会確認</h2>
 
         <p>
@@ -52,4 +52,3 @@
         </div>
     </main>
 </section>
-
