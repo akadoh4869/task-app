@@ -171,8 +171,7 @@
 <section id="panel-account-info" class="setting-panel">
     <!-- アカウント設定オーバーレイ -->
     <main class="panel-inner">
-        <div class="overlay-content">
-            <span class="close-btn" onclick="closeOverlay('account-overlay')">&times;</span>
+        <div class="account-content">
             <h3>アカウント情報</h3>
             <p>ユーザーネーム: <strong>{{ $user->user_name }}</strong></p>
             <p>アカウント名:   <strong>{{ $user->name }}</strong></p>
@@ -255,11 +254,8 @@
 <section id="panel-completed" class="setting-panel">
     <main class="panel-inner">
         <!-- 完了タスク一覧オーバーレイ -->
-        <div id="completed-tasks-overlay" class="overlay">
-            <div class="overlay-content">
-                <span class="close-btn" onclick="closeOverlay('completed-tasks-overlay')">&times;</span>
+            <div class="completed-content">
                 <h3>完了タスク一覧</h3>
-
                 <!-- プルダウン切り替え -->
                 <form method="GET" action="{{ route('setting.index') }}">
                     <label for="task_scope">表示対象：</label>
@@ -304,7 +300,6 @@
                     @endif
                 </div>
             </div>
-        </div>
 
     </main>
     
