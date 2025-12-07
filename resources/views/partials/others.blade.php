@@ -52,3 +52,82 @@
         </div>
     </main>
 </section>
+
+{{-- ➂管理者ダッシュボード --}}
+<section class="setting-panel" id="panel-admin">
+    @if(isset($adminStats))
+        <main class="panel-inner">
+            <h2 class="mb-3">管理者ダッシュボード</h2>
+
+            {{-- サマリーカード --}}
+            <div class="admin-summary-cards">
+                <div class="admin-card">
+                    <div class="admin-card-label">登録ユーザー数</div>
+                    <div class="admin-card-value">{{ $adminStats['total_users'] }}</div>
+                </div>
+
+                {{-- <div class="admin-card">
+                    <div class="admin-card-label">有料会員数</div>
+                    <div class="admin-card-value">{{ $adminStats['paid_users'] }}</div>
+                </div> --}}
+
+                <div class="admin-card">
+                    <div class="admin-card-label">グループ数</div>
+                    <div class="admin-card-value">{{ $adminStats['total_groups'] }}</div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-card-label">タスク総数</div>
+                    <div class="admin-card-value">{{ $adminStats['total_tasks'] }}</div>
+                </div>
+            </div>
+
+            {{-- 利用状況ミニ統計 --}}
+            <div class="admin-section">
+                <h3 class="admin-section-title">利用状況</h3>
+                <ul class="admin-stats-list">
+                    <li>本日作成されたタスク：<strong>{{ $adminStats['today_tasks'] }}</strong> 件</li>
+                    {{-- <li>今週完了したタスク：<strong>{{ $adminStats['this_week_done'] }}</strong> 件</li> --}}
+                    <li>保留中のグループ招待：<strong>{{ $adminStats['pending_invites'] }}</strong> 件</li>
+                </ul>
+            </div>
+
+            {{-- 最近登録したユーザー --}}
+            <div class="admin-section">
+                <h3 class="admin-section-title">最近登録したユーザー</h3>
+
+                @if($adminStats['recent_users']->isEmpty())
+                    <p>最近の新規登録ユーザーはまだいません。</p>
+                @else
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ユーザーネーム</th>
+                                <th>アカウント名</th>
+                                <th>メールアドレス</th>
+                                <th>登録日</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($adminStats['recent_users'] as $u)
+                                <tr>
+                                    <td>{{ $u->user_name }}</td>
+                                    <td>{{ $u->name }}</td>
+                                    <td>{{ $u->email }}</td>
+                                    <td>{{ $u->created_at->format('Y-m-d') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+        </main>
+    @else
+        {{-- 念のための保険（非管理者が panel-admin に来た場合） --}}
+        <main class="panel-inner">
+            <p>管理者のみがアクセスできるページです。</p>
+        </main>
+    @endif
+</section>
+
+

@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Task;
 use App\Models\GroupInvitation;
+use App\Models\User;
+use App\Models\Group;
+use Carbon\Carbon;
+
 
 
 
@@ -87,6 +91,25 @@ class SettingController extends Controller
             $showCompletedOverlay = true;
         }
 
+         $adminStats = null;
+
+        if ($user && $user->is_admin) {
+            $adminStats = [
+                'total_users'      => User::count(),
+                // 'paid_users'       => User::where('subscription_status', 1)->count(),
+                'total_groups'     => Group::count(),
+                'total_tasks'      => Task::count(),
+                'today_tasks'      => Task::whereDate('created_at', Carbon::today())->count(),
+                // 'this_week_done'   => Task::whereNotNull('completed_at')
+                //                         ->whereBetween('completed_at', [
+                //                             Carbon::now()->startOfWeek(),
+                //                             Carbon::now()->endOfWeek(),
+                //                         ])->count(),
+                'pending_invites'  => GroupInvitation::where('status', 'pending')->count(),
+                'recent_users'     => User::orderBy('created_at', 'desc')->take(100)->get(),
+            ];
+        }
+
         return view('setting', [
             // ★ もともとの setting.blade で使っていた変数
             'pendingInvitations'   => $pendingInvitations,
@@ -98,6 +121,7 @@ class SettingController extends Controller
             'selectedScope'        => $selected,
             'completedTasks'       => $completedTasks,
             'showCompletedOverlay' => $showCompletedOverlay,
+             'adminStats' => $adminStats,
         ]);
     }
 }
