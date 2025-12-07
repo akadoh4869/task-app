@@ -60,6 +60,13 @@
   border-radius: 8px;
 }
 
+.panel-inner{
+    flex:1; 
+    padding:20px;
+    max-width:720px;
+    margin:auto;
+}
+
 /* プロフィール編集 */
 /* ===== 自前モーダル（Bootstrap衝突回避のため固有名） ===== */
 .amodal-backdrop{
