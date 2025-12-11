@@ -31,6 +31,22 @@ class SettingController extends Controller
         // ▼ 所属しているスペースの数（例：3つまでしか参加できないなどのロジック用）
         $totalSpaceCount = $user->groups()->count();
 
+        // ✅ 自分の「やるべきタスク」統合（個人 + グループアサイン）
+        $personalTasks = $user->createdTasks;        // 自分の個人タスク
+        $assignedTasks = $user->assignedTasks;       // グループ含むアサインタスク
+
+        $allMyTasks = $personalTasks
+            ->merge($assignedTasks)
+            ->unique('id');
+
+        // ✅ 総数・完了数・達成率
+        $assignedTotal = $allMyTasks->count();
+        $assignedDone  = $allMyTasks->where('status', 'completed')->count();
+        $assignedRate  = $assignedTotal > 0
+        ? round($assignedDone / $assignedTotal * 100)
+        : 0;
+
+
         // ▼ 完了タスク表示範囲（account.index でやっていた処理をそのまま移植）
         $selected = $request->input('task_scope');
         if ($selected !== null) {
@@ -121,7 +137,11 @@ class SettingController extends Controller
             'selectedScope'        => $selected,
             'completedTasks'       => $completedTasks,
             'showCompletedOverlay' => $showCompletedOverlay,
-             'adminStats' => $adminStats,
+            'adminStats' => $adminStats,
+            // ✅ 追加：アサインタスク統計
+            'assignedTotal'        => $assignedTotal,
+            'assignedDone'         => $assignedDone,
+            'assignedRate'         => $assignedRate,
         ]);
     }
 }
