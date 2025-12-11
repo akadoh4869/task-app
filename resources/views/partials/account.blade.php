@@ -10,11 +10,21 @@
     $completedTasks = $completedTasks ?? collect();
 @endphp
 
+{{-- 利用状況（簡易統計） --}}
+@php
+// リレーションがある前提。無い場合は 0 になるようにガード
+$groupCount   = method_exists($user, 'groups') ? $user->groups()->count() : 0;
+$taskBuilder  = method_exists($user, 'tasks')  ? $user->tasks() : null;
+$taskTotal    = $taskBuilder ? $taskBuilder->count() : 0;
+$taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed')->count() : 0;
+@endphp
 
-{{-- ➀プロフィール編集 --}}
+
+{{-- ➀ アカウント設定（プロフィール編集＋アカウント情報 統合） --}}
 <section id="panel-profile-edit" class="setting-panel">
-    <!-- メイン -->
     <main class="panel-inner">
+
+        {{-- ✅ 成功・エラー --}}
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -30,7 +40,9 @@
 
         <h2 class="mb-3">プロフィール編集</h2>
 
-        {{-- メイン：表示名 & アイコン --}}
+        {{-- =========================
+            🔹 プロフィール編集ブロック
+        ========================= --}}
         <form method="POST" action="{{ route('users.update') }}" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
@@ -55,21 +67,23 @@
 
         <hr class="my-4">
 
-        {{-- 個別変更（モーダル起動） --}}
+        {{-- =========================
+            🔹 個別変更（モーダル起動）
+        ========================= --}}
         <div class="stack" style="display:grid; gap:12px; max-width:520px;">
             <div>
                 <div class="label-sm text-muted">現在のメール</div>
                 <div style="display:flex; align-items:center; justify-content:space-between;">
                     <strong>{{ $user->email }}</strong>
-                    <button type="button" class="btn btn-light" data-modal-open="modal-email">メールアドレスを変更</button>
+                    <button type="button" class="btn btn-light" data-modal-open="modal-email">メール変更</button>
                 </div>
             </div>
 
             <div>
-                <div class="label-sm text-muted">現在のユーザーネーム</div>
+                <div class="label-sm text-muted">登録ユーザーネーム</div>
                 <div style="display:flex; align-items:center; justify-content:space-between;">
                     <strong>{{ $user->user_name }}</strong>
-                    <button type="button" class="btn btn-light" data-modal-open="modal-username">ユーザーネームを変更</button>
+                    <button type="button" class="btn btn-light" data-modal-open="modal-username">ユーザーネーム変更</button>
                 </div>
             </div>
 
@@ -77,10 +91,52 @@
                 <div class="label-sm text-muted">パスワード</div>
                 <div style="display:flex; align-items:center; justify-content:space-between;">
                     <span>********</span>
-                    <button type="button" class="btn btn-light" data-modal-open="modal-password">パスワードを変更</button>
+                    <button type="button" class="btn btn-light" data-modal-open="modal-password">パスワード変更</button>
                 </div>
             </div>
         </div>
+
+        {{-- =========================
+            🔹 アカウント情報（表示専用）
+        ========================= --}}
+        <div class="account-block">
+
+            <p>会員ステータス:
+                <strong>無料会員</strong>
+            </p>
+        </div>
+
+        {{-- =========================
+            🔹 利用状況（統計）
+        ========================= --}}
+        <div class="account-block">
+            <h4>利用状況</h4>
+
+            <p>所属グループ数:
+                <strong>{{ $groupCount }}</strong>
+            </p>
+
+            <ul class="group-name-list">
+                @foreach($groups as $group)
+                    <li class="group-name-item">
+                        ・{{ $group->group_name }}
+                    </li>
+                @endforeach
+            </ul>
+
+            <p>自分にアサインされたタスク数:
+                <strong>{{ $assignedTotal }}</strong>
+            </p>
+
+            <p>そのうち完了タスク数:
+                <strong>{{ $assignedDone }}</strong>
+            </p>
+
+            <p>自分がすべきタスクの達成率:
+                <strong>{{ $assignedRate }}%</strong>
+            </p>
+        </div>
+
     </main>
 
     {{-- ===== モーダル群（amodal系に置換） ===== --}}
@@ -167,32 +223,95 @@
     </div>
 </section>
 
-{{-- ➁アカウント情報 --}}
-<section id="panel-account-info" class="setting-panel">
-    <!-- アカウント設定オーバーレイ -->
+{{-- ➁お知らせ --}}
+<section id="panel-notice" class="setting-panel">
     <main class="panel-inner">
-        <div class="account-content">
-            <h3>アカウント情報</h3>
-            <p>ユーザーネーム: <strong>{{ $user->user_name }}</strong></p>
-            <p>アカウント名:   <strong>{{ $user->name }}</strong></p>
-            <p>メールアドレス: <strong>{{ $user->email }}</strong></p>
-            <p>会員ステータス:
-            <strong>
-                @if($user->subscription_status)
-                有料会員（買い切り）
-                @else
-                無料会員
-                @endif
-            </strong>
-            </p>
+        <h2 class="mb-3">お知らせ</h2>
+
+        <div class="notice-list">
+
+            {{-- 例：未読 --}}
+            <div class="notice-item is-unread">
+                <div class="notice-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div class="notice-body">
+                    <div class="notice-title">グループに招待されました</div>
+                    <div class="notice-text">「○○プロジェクト」への参加招待が届いています。</div>
+                    <div class="notice-time">2025/04/16 20:31</div>
+                </div>
+            </div>
+
+            {{-- 例：既読 --}}
+            <div class="notice-item">
+                <div class="notice-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="notice-body">
+                    <div class="notice-title">タスクの期限が近づいています</div>
+                    <div class="notice-text">「資料作成」の期限は明日です。</div>
+                    <div class="notice-time">2025/04/15 09:10</div>
+                </div>
+            </div>
+
+            {{-- お知らせなし --}}
+            {{--
+            <p class="text-muted">現在お知らせはありません。</p>
+            --}}
 
         </div>
     </main>
+</section>
 
+{{-- ➂通知設定 --}}
+<section id="panel-notification-setting" class="setting-panel">
+    <main class="panel-inner">
+        <h2 class="mb-3">通知設定</h2>
+
+        <form method="POST" action="#">
+            @csrf
+
+            <div class="notify-item">
+                <span>タスク期限の通知</span>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="notify-item">
+                <span>グループ招待の通知</span>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="notify-item">
+                <span>タスク完了時の通知</span>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="notify-item">
+                <span>プッシュ通知（PWA）</span>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <button class="btn btn-primary mt-3">保存する</button>
+        </form>
+    </main>
 </section>
 
 
-{{-- ➂招待一覧 --}}
+
+
+{{-- ➃招待一覧 --}}
 <section id="panel-invitations" class="setting-panel">
     <main class="panel-inner">
 
@@ -251,7 +370,7 @@
 </section>
 
 {{-- ➃完了タスク一覧 --}}
-<section id="panel-completed" class="setting-panel">
+{{-- <section id="panel-completed" class="setting-panel">
     <main class="panel-inner">
         <!-- 完了タスク一覧オーバーレイ -->
             <div class="completed-content">
@@ -304,3 +423,7 @@
     </main>
     
 </section>
+
+
+
+ --}}

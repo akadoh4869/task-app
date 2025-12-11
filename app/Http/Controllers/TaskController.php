@@ -152,71 +152,150 @@ class TaskController extends Controller
         return redirect('/task')->with('success', 'タスクを登録しました！');
     }
 
+    // public function share(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     $year = (int) $request->input('year', 2025);
+
+    //     $groups = $user->groups()->orderBy('created_at')->get();
+    //     $selectedGroupId = $request->input('group_id');
+
+    //     if ($selectedGroupId === 'create') {
+    //         return redirect()->route('group.create');
+    //     }
+
+    //     if ($selectedGroupId !== null) {
+    //         session(['selected_group_id' => $selectedGroupId]);
+    //     } else {
+    //         $selectedGroupId = session('selected_group_id');
+    //         if (!$selectedGroupId && $groups->isNotEmpty()) {
+    //             $selectedGroupId = $groups->first()->id;
+    //             session(['selected_group_id' => $selectedGroupId]);
+    //         }
+    //     }
+
+    //     $groupTasks = collect();
+    //     $selectedGroup = null;
+    //     $groupMembers = collect();
+    //     $inviteCandidates = collect();
+
+    //     if ($selectedGroupId && $groups->pluck('id')->contains((int)$selectedGroupId)) {
+    //         $selectedGroup = Group::find($selectedGroupId);
+
+    //         $groupTasks = Task::where('group_id', $selectedGroupId)
+    //             ->where('status', '!=', 'completed')
+    //             ->with('assignedUsers')
+    //             ->get()
+    //             ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
+    //             ->sortBy(fn($task) => $task->due_date ?? now()->addYears(100));
+
+    //         $groupMembers = $selectedGroup->users;
+
+    //         if ($request->filled('search_user')) {
+    //             $keyword = $request->input('search_user');
+    //             $inviteCandidates = User::where('user_name', 'like', "%$keyword%")
+    //                 ->whereNotIn('id', $groupMembers->pluck('id'))
+    //                 ->get();
+    //         }
+    //     }
+
+    //     $pendingInvitedUserIds = GroupInvitation::where('group_id', $selectedGroupId)
+    //     ->where('status', 'pending')
+    //     ->pluck('invitee_id');
+
+    //     $pendingInvitedUsers = User::whereIn('id', $pendingInvitedUserIds)->get();
+
+    //     return view('task.share', [
+    //         'groups' => $groups,
+    //         'selectedGroupId' => $selectedGroupId,
+    //         'groupTasks' => $groupTasks,
+    //         'year' => $year,
+    //         'selectedGroup' => $selectedGroup,
+    //         'groupMembers' => $groupMembers,
+    //         'inviteCandidates' => $inviteCandidates,
+    //         'pendingInvitedUserIds' => $pendingInvitedUserIds,
+    //         'pendingInvitedUsers' => $pendingInvitedUsers, // ✅ これを追加
+    //     ]);
+    // }
+
     public function share(Request $request)
-    {
-        $user = Auth::user();
-        $year = (int) $request->input('year', 2025);
+{
+    $user = Auth::user();
+    $year = (int) $request->input('year', 2025);
 
-        $groups = $user->groups()->orderBy('created_at')->get();
-        $selectedGroupId = $request->input('group_id');
+    $groups = $user->groups()->orderBy('created_at')->get();
+    $selectedGroupId = $request->input('group_id');
 
-        if ($selectedGroupId === 'create') {
-            return redirect()->route('group.create');
-        }
+    if ($selectedGroupId === 'create') {
+        return redirect()->route('group.create');
+    }
 
-        if ($selectedGroupId !== null) {
+    if ($selectedGroupId !== null) {
+        session(['selected_group_id' => $selectedGroupId]);
+    } else {
+        $selectedGroupId = session('selected_group_id');
+        if (!$selectedGroupId && $groups->isNotEmpty()) {
+            $selectedGroupId = $groups->first()->id;
             session(['selected_group_id' => $selectedGroupId]);
-        } else {
-            $selectedGroupId = session('selected_group_id');
-            if (!$selectedGroupId && $groups->isNotEmpty()) {
-                $selectedGroupId = $groups->first()->id;
-                session(['selected_group_id' => $selectedGroupId]);
-            }
         }
+    }
 
-        $groupTasks = collect();
-        $selectedGroup = null;
-        $groupMembers = collect();
-        $inviteCandidates = collect();
+    $groupTasks      = collect();
+    $completedTasks  = collect();   // ★ 追加：完了タスク用
+    $selectedGroup   = null;
+    $groupMembers    = collect();
+    $inviteCandidates = collect();
 
-        if ($selectedGroupId && $groups->pluck('id')->contains((int)$selectedGroupId)) {
-            $selectedGroup = Group::find($selectedGroupId);
+    if ($selectedGroupId && $groups->pluck('id')->contains((int)$selectedGroupId)) {
+        $selectedGroup = Group::find($selectedGroupId);
 
-            $groupTasks = Task::where('group_id', $selectedGroupId)
-                ->where('status', '!=', 'completed')
-                ->with('assignedUsers')
-                ->get()
-                ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
-                ->sortBy(fn($task) => $task->due_date ?? now()->addYears(100));
+        // ▼ 未完了タスク
+        $groupTasks = Task::where('group_id', $selectedGroupId)
+            ->where('status', '!=', 'completed')
+            ->with('assignedUsers')
+            ->get()
+            ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
+            ->sortBy(fn($task) => $task->due_date ?? now()->addYears(100));
 
-            $groupMembers = $selectedGroup->users;
+        // ▼ 完了タスク（右側の一覧用）
+        $completedTasks = Task::where('group_id', $selectedGroupId)
+            ->where('status', 'completed')
+            ->with('assignedUsers')
+            ->get()
+            ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
+            // 期限の新しいもの or 更新日の新しいものを上にしたいイメージ
+            ->sortByDesc(fn($task) => $task->updated_at ?? $task->due_date ?? now());
 
-            if ($request->filled('search_user')) {
-                $keyword = $request->input('search_user');
-                $inviteCandidates = User::where('user_name', 'like', "%$keyword%")
-                    ->whereNotIn('id', $groupMembers->pluck('id'))
-                    ->get();
-            }
+        $groupMembers = $selectedGroup->users;
+
+        if ($request->filled('search_user')) {
+            $keyword = $request->input('search_user');
+            $inviteCandidates = User::where('user_name', 'like', "%$keyword%")
+                ->whereNotIn('id', $groupMembers->pluck('id'))
+                ->get();
         }
+    }
 
-        $pendingInvitedUserIds = GroupInvitation::where('group_id', $selectedGroupId)
+    $pendingInvitedUserIds = GroupInvitation::where('group_id', $selectedGroupId)
         ->where('status', 'pending')
         ->pluck('invitee_id');
 
-        $pendingInvitedUsers = User::whereIn('id', $pendingInvitedUserIds)->get();
+    $pendingInvitedUsers = User::whereIn('id', $pendingInvitedUserIds)->get();
 
-        return view('task.share', [
-            'groups' => $groups,
-            'selectedGroupId' => $selectedGroupId,
-            'groupTasks' => $groupTasks,
-            'year' => $year,
-            'selectedGroup' => $selectedGroup,
-            'groupMembers' => $groupMembers,
-            'inviteCandidates' => $inviteCandidates,
-            'pendingInvitedUserIds' => $pendingInvitedUserIds,
-            'pendingInvitedUsers' => $pendingInvitedUsers, // ✅ これを追加
-        ]);
-    }
+    return view('task.share', [
+        'groups'              => $groups,
+        'selectedGroupId'     => $selectedGroupId,
+        'groupTasks'          => $groupTasks,
+        'completedTasks'      => $completedTasks,   // ★ ここでビューに渡す
+        'year'                => $year,
+        'selectedGroup'       => $selectedGroup,
+        'groupMembers'        => $groupMembers,
+        'inviteCandidates'    => $inviteCandidates,
+        'pendingInvitedUserIds' => $pendingInvitedUserIds,
+        'pendingInvitedUsers'   => $pendingInvitedUsers,
+    ]);
+}
+
 
 
     public function detail($id)

@@ -46,18 +46,23 @@
                             <i class="fa-solid fa-pen-to-square"></i>
                             <div class="setting-label">プロフィール編集</div>
                         </div>
-                        <div class="setting-item" data-panel="panel-account-info">
-                            <i class="fa-solid fa-user" ></i>
-                            <div class="setting-label">アカウント情報</div>
+                        <div class="setting-item" data-panel="panel-notice">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <div class="setting-label">お知らせ</div>
+                        </div>
+                        <div class="setting-item" data-panel="panel-notification-setting">
+                            <i class="fa-solid fa-bell-slash"></i>
+                            <div class="setting-label">通知設定</div>
                         </div>
                         <div class="setting-item" data-panel="panel-invitations">
                             <i class="fa-solid fa-envelope"></i>
                             <div class="setting-label">招待一覧</div>
                         </div>
-                        <div class="setting-item" data-panel="panel-completed">
+                        {{-- <div class="setting-item" data-panel="panel-completed">
                             <i class="fa-solid fa-star"></i>
                             <div class="setting-label">完了タスク一覧</div>
-                        </div>
+                        </div> --}}
+                        
                         <div class="setting-item" data-panel="panel-options">
                             <i class="fa-solid fa-gem"></i>
                             <div class="setting-label">有料オプション</div>
