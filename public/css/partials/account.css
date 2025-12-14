@@ -112,8 +112,6 @@ strong{
     margin-top:16px;
 }
 
-
-
 /* スマホ時は縦並び */
 @media (max-width: 768px) {
   .setting-wrapper {
