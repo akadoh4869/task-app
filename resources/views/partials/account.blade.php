@@ -143,7 +143,7 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
             <ul class="group-name-list">
                 @foreach($groups as $group)
                     <li class="group-name-item">
-                        ・{{ $group->group_name }}
+                        {{ $group->group_name }}
                     </li>
                 @endforeach
             </ul>
