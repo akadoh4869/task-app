@@ -11,7 +11,10 @@
   <link rel="stylesheet" href="{{ asset('css/tentative/common.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/tentative/setting.css')}}"/>
   <link rel="stylesheet" href="{{ asset('css/common.css')}}"/>
+  <link rel="stylesheet" href="{{ asset('css/settings/index.css') }}"/>
   <script src="{{ asset('js/tentative/setting.js') }}"></script>
+  <script src="{{ asset('js/partials/account.js') }}"></script>
+
   <title>設定</title>
 </head>
 

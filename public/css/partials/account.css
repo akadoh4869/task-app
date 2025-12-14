@@ -1,0 +1,130 @@
+.account-public-block , .secret-account-block, .account-block{
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 20px;
+  padding: 3% 10%;
+}
+
+.account-face{
+    display: flex;
+    width: 100%;
+    align-items: center;
+
+}
+.form-label{
+    width: 20%;
+}
+.form-control{
+    /* border: none;
+    border-bottom: 1px solid gray; */
+    width:80%;
+    /* border-radius: 0; */
+}
+
+/* アバター周り */
+.avatar-row{
+  display:flex;
+  gap:16px;
+  align-items:center;
+}
+
+/* 画像 */
+#avatarPreview{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid #ddd;
+}
+
+/* file input は完全に隠す */
+.avatar-input{
+  display:none;
+}
+
+/* ボタン風 label */
+.avatar-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 14px;
+  border-radius:8px;
+  background:#f1f5f9;
+  border:1px solid #cbd5e1;
+  color:#334155;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.15s;
+  /* width: 80%; */
+  margin-left: 5%;
+}
+
+.avatar-btn:hover{
+  background:#e2e8f0;
+}
+
+.avatar-btn:active{
+  transform: translateY(1px);
+}
+
+strong{
+    margin-left: 2%;
+}
+
+
+/* プロフィール編集 */
+/* ===== 自前モーダル（Bootstrap衝突回避のため固有名） ===== */
+.amodal-backdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:3000;
+}
+.amodal-backdrop.is-open{ display:flex !important; }
+
+.amodal{
+    background:#fff;
+    border-radius:12px;
+    width:min(560px,92vw);
+    padding:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.amodal header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+}
+.amodal .close{
+    background:none;
+    border:none;
+    font-size:24px;
+    line-height:1;
+    cursor:pointer;
+}
+.amodal .actions{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    margin-top:16px;
+}
+
+
+
+/* スマホ時は縦並び */
+@media (max-width: 768px) {
+  .setting-wrapper {
+    flex-direction: column;
+  }
+  .setting-container {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+  }
+  .setting-item {
+    flex: 1 0 auto;
+  }
+}
