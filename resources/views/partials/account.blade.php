@@ -38,73 +38,97 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
             </div>
         @endif
 
-        <h2 class="mb-3">プロフィール編集</h2>
+        <h4 class="mb-3">プロフィール編集</h4>
 
-        {{-- =========================
-            🔹 プロフィール編集ブロック
-        ========================= --}}
-        <form method="POST" action="{{ route('users.update') }}" enctype="multipart/form-data">
-            @csrf
-            @method('PATCH')
+        <div class="account-public-block">
+            {{-- =========================
+                🔹 プロフィール編集ブロック
+            ========================= --}}
+            <form id="profileForm"
+                    method="POST"
+                    action="{{ route('users.update') }}"
+                    enctype="multipart/form-data"
+                    class="profile-form">
+                @csrf
+                @method('PATCH')
 
-            <div class="mb-3">
-                <label class="form-label">アカウント名（表示名）</label>
-                <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
-            </div>
+                <div class="mb-3">
+                    <div class="account-face">
+                        <label class="form-label">アカウント名</label>
+                        <input id="nameInput"
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            value="{{ old('name', $user->name) }}"
+                            required>
 
-            <div class="mb-3">
-                <label class="form-label">アイコン画像（任意）</label>
-                <div style="display:flex; gap:16px; align-items:center;">
-                    <img src="{{ asset($user->avatar ? 'storage/'.$user->avatar : 'storage/images/default.png') }}"
-                         alt="avatar" width="64" height="64" style="border-radius:50%; object-fit:cover;">
-                    <input type="file" name="avatar" accept="image/*">
+                    </div>
+                    
                 </div>
-                <small class="text-muted">jpg / png / webp、5MBまで</small>
-            </div>
 
-            <button class="btn btn-primary">更新する</button>
-        </form>
+                <div class="mb-3">
+                    <div class="avatar-row">
+                        <img id="avatarPreview"
+                            src="{{ asset($user->avatar ? 'storage/'.$user->avatar : 'storage/images/default.png') }}"
+                            alt="avatar">
+
+                        {{-- 見せない file input --}}
+                        <input id="avatarInput"
+                            type="file"
+                            name="avatar"
+                            accept="image/*"
+                            class="avatar-input">
+
+                        {{-- 見せるボタン --}}
+                        <label for="avatarInput" class="avatar-btn">
+                        写真を変更する
+                        </label>
+                    </div>
+                </div>
+
+
+                <p>会員ステータス: <strong>無料会員</strong></p>
+
+                {{-- ✅ 自動保存の状態表示 --}}
+                <div id="autosaveStatus" style="font-size:12px; color:#666; margin-top:8px;"></div>
+            </form>
+
+        </div>
 
         <hr class="my-4">
 
         {{-- =========================
             🔹 個別変更（モーダル起動）
         ========================= --}}
-        <div class="stack" style="display:grid; gap:12px; max-width:520px;">
-            <div>
-                <div class="label-sm text-muted">現在のメール</div>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <strong>{{ $user->email }}</strong>
-                    <button type="button" class="btn btn-light" data-modal-open="modal-email">メール変更</button>
+        <div class="secret-account-block">
+            <div class="stack" style="display:grid; gap:12px; max-width:520px;">
+                <div>
+                    <div class="label-sm text-muted">現在のメール</div>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <strong>{{ $user->email }}</strong>
+                        <button type="button" class="btn btn-light" data-modal-open="modal-email">メール変更</button>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <div class="label-sm text-muted">登録ユーザーネーム</div>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <strong>{{ $user->user_name }}</strong>
-                    <button type="button" class="btn btn-light" data-modal-open="modal-username">ユーザーネーム変更</button>
+                <div>
+                    <div class="label-sm text-muted">パスワード</div>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span>********</span>
+                        <button type="button" class="btn btn-light" data-modal-open="modal-password">パスワード変更</button>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <div class="label-sm text-muted">パスワード</div>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <span>********</span>
-                    <button type="button" class="btn btn-light" data-modal-open="modal-password">パスワード変更</button>
-                </div>
+                {{-- <div>
+                    <div class="label-sm text-muted">登録ユーザーネーム</div>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <strong>{{ $user->user_name }}</strong>
+                        <button type="button" class="btn btn-light" data-modal-open="modal-username">ユーザーネーム変更</button>
+                    </div>
+                </div> --}}
             </div>
         </div>
-
-        {{-- =========================
-            🔹 アカウント情報（表示専用）
-        ========================= --}}
-        <div class="account-block">
-
-            <p>会員ステータス:
-                <strong>無料会員</strong>
-            </p>
-        </div>
+        
+        <hr class="my-4">
 
         {{-- =========================
             🔹 利用状況（統計）
