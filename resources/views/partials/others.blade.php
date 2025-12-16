@@ -57,7 +57,7 @@
 <section class="setting-panel" id="panel-admin">
     @if(isset($adminStats))
         <main class="panel-inner">
-            <h2 class="mb-3">管理者ダッシュボード</h2>
+            <h3 class="mb-3">管理者ダッシュボード</h3>
 
             {{-- サマリーカード --}}
             <div class="admin-summary-cards">
@@ -84,7 +84,7 @@
 
             {{-- 利用状況ミニ統計 --}}
             <div class="admin-section">
-                <h3 class="admin-section-title">利用状況</h3>
+                <h4 class="admin-section-title">利用状況</h4>
                 <ul class="admin-stats-list">
                     <li>本日作成されたタスク：<strong>{{ $adminStats['today_tasks'] }}</strong> 件</li>
                     {{-- <li>今週完了したタスク：<strong>{{ $adminStats['this_week_done'] }}</strong> 件</li> --}}
@@ -94,7 +94,7 @@
 
             {{-- 最近登録したユーザー --}}
             <div class="admin-section">
-                <h3 class="admin-section-title">最近登録したユーザー</h3>
+                <h4 class="admin-section-title">最近登録したユーザー</h4>
 
                 @if($adminStats['recent_users']->isEmpty())
                     <p>最近の新規登録ユーザーはまだいません。</p>
