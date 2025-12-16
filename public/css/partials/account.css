@@ -88,9 +88,11 @@ strong{
 .amodal{
     background:#fff;
     border-radius:12px;
-    width:min(560px,92vw);
+    width:40%;
     padding:20px;
     box-shadow:0 10px 30px rgba(0,0,0,.25);
+    position: relative; /* ← 追加 */
+    
 }
 .amodal header{
     display:flex;
@@ -99,11 +101,14 @@ strong{
     margin-bottom:12px;
 }
 .amodal .close{
-    background:none;
-    border:none;
-    font-size:24px;
-    line-height:1;
-    cursor:pointer;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
 }
 .amodal .actions{
     display:flex;
@@ -111,18 +116,8 @@ strong{
     justify-content:flex-end;
     margin-top:16px;
 }
-
-/* スマホ時は縦並び */
-@media (max-width: 768px) {
-  .setting-wrapper {
-    flex-direction: column;
-  }
-  .setting-container {
-    width: 100%;
-    display: flex;
-    overflow-x: auto;
-  }
-  .setting-item {
-    flex: 1 0 auto;
-  }
+.amodal label{
+    display: inline-block;
+    white-space: nowrap;
+    margin-bottom: 6px;
 }
