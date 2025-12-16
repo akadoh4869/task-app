@@ -168,7 +168,7 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
     <div id="modal-email" class="amodal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-email-title">
         <div class="amodal">
             <header>
-                <h3 id="modal-email-title">メールアドレスを変更</h3>
+                <h4 id="modal-email-title">メールアドレスを変更</h4>
                 <button type="button" class="close" data-modal-close="modal-email" aria-label="閉じる">&times;</button>
             </header>
             <form method="POST" action="{{ route('users.updateEmail') }}">
@@ -191,7 +191,7 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
     </div>
 
     {{-- ユーザーネーム変更 --}}
-    <div id="modal-username" class="amodal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-username-title">
+    {{-- <div id="modal-username" class="amodal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-username-title">
         <div class="amodal">
             <header>
                 <h3 id="modal-username-title">ユーザーネームを変更</h3>
@@ -214,7 +214,7 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
                 </div>
             </form>
         </div>
-    </div>
+    </div> --}}
 
     {{-- パスワード変更 --}}
     <div id="modal-password" class="amodal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-password-title">
