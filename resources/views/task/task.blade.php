@@ -174,6 +174,12 @@
               {{-- =========================
                   ボディ部
               ========================== --}}
+
+              @php
+                $minRows = 12;
+                $tasksForCalendar = $allPersonalTasks->take(10); // ← 最大10件だけ表示（不要ならtake(10)消す）
+              @endphp
+
               <div class="gantt-body">
                 @foreach($allPersonalTasks as $task)
                   <div class="gantt-row">
@@ -196,13 +202,31 @@
                             data-overdue="{{ $isOverdue ? '1' : '0' }}">
                           <span class="gantt-label">{{ $task->task_name }}</span>
                         </div>
-                      {{-- @else
-                        <span class="no-date"></span> --}}
                       @endif
-
+                      
                     </div>
                   </div>
                 @endforeach
+
+                {{-- ▼ 足りない分を「空行」で埋める（最低10行にする） --}}
+                @php
+                  $taskCount = $tasksForCalendar->count();
+                  $emptyRows = max($minRows - $taskCount, 0);
+                @endphp
+
+                @for ($i = 0; $i < $emptyRows; $i++)
+                  <div class="gantt-row gantt-row-empty">
+                    <div class="gantt-task-col">&nbsp;</div>
+                    <div class="gantt-timeline">
+                      @php $d = $startDate->copy(); @endphp
+                      @while ($d->lte($endDate))
+                        <div class="gantt-day" data-date="{{ $d->format('Y-m-d') }}"></div>
+                        @php $d->addDay(); @endphp
+                      @endwhile
+                    </div>
+                  </div>
+                @endfor
+
               </div>
             </div>
           </section>

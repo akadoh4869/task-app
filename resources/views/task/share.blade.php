@@ -273,9 +273,10 @@
                           </div>
                         @endfor
                       </div>
+                    </div>
 
                         
-                    </section>
+                  </section>
               @endif
             </div>
             <section class="group">
