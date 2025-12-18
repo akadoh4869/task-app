@@ -121,3 +121,90 @@ strong{
     white-space: nowrap;
     margin-bottom: 6px;
 }
+
+/*招待一覧*/
+.history-title{
+  margin-bottom: 10%;
+}
+
+#panel-invitations {
+  width: 100%;
+}
+#panel-invitations .panel-inner{
+  position: relative;
+  /* max-width: 520px;          ← ここが肝。スマホっぽいがPC対応 */
+  margin: 0 auto;            /* 中央寄せ */
+  min-height: 75vh;
+  background: #fff;
+  overflow: hidden;
+}
+
+#panel-invitations .invitation-icon{
+  position: absolute;
+  left: 50%;
+  top: 50%;                        /* ← 少し上に */
+  transform: translate(-50%, -50%);
+  color: rgba(120, 220, 235, .22);
+  z-index: 10;
+  pointer-events: none;
+}
+.invitation-icon > .fa-solid {
+  font-size: 350px;
+}
+
+.invitation-list {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+/* 招待カード */
+.invitation-card {
+    width: 100%;
+    background: white;
+    padding: 10px;
+    /* border-radius: 12px; */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px dotted #5ce0f0;
+}
+
+.invitation-text {
+    font-weight: bold;
+    font-size: 16px;
+    color: #666;
+    text-align: left;
+}
+
+.invitation-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.accept-btn, .decline-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.accept-btn {
+    background: #ff66cc;
+    color: white;
+}
+
+.decline-btn {
+    background: #5ce0f0;
+    color: white;
+}
+
+
