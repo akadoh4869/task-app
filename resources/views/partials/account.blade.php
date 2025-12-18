@@ -340,9 +340,13 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
             <i class="fa-solid fa-envelope"></i>
         </div>
         @if($pendingInvitations->isEmpty())
-            <p style="text-align: center; margin-top: 50px;">
-                保留中のグループ招待はありません。
-            </p>
+            <div class="invitation-list">
+                <div class="invitation-card invitation-empty">
+                    <div class="invitation-text">
+                        保留中のグループ招待はありません。
+                    </div>
+                </div>
+            </div>
         @else
             <div class="invitation-list">
                 @foreach($pendingInvitations as $invitation)
