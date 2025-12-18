@@ -163,6 +163,18 @@ strong{
     margin-right: 5%;
 }
 
+/* 空状態カード */
+.invitation-card.invitation-empty{
+    /* justify-content: center;   中央寄せ */
+    border-bottom: 2px dotted #666;
+}
+
+.invitation-card.invitation-empty .invitation-text{
+    font-weight: normal;
+    font-size: 16px;
+    color: #666;
+    /* text-align: center; */
+}
 /* 招待カード */
 .invitation-card {
     width: 100%;
