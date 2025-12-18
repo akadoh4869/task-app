@@ -332,19 +332,13 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
     </main>
 </section>
 
-
-
-
 {{-- ➃招待一覧 --}}
 <section id="panel-invitations" class="setting-panel">
     <main class="panel-inner">
-
-        <div class="history-title">保留中招待一覧</div>
-
+        <h4 class="history-title">保留中招待一覧</h4>
         <div class="invitation-icon">
             <i class="fa-solid fa-envelope"></i>
         </div>
-
         @if($pendingInvitations->isEmpty())
             <p style="text-align: center; margin-top: 50px;">
                 保留中のグループ招待はありません。
@@ -353,11 +347,9 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
             <div class="invitation-list">
                 @foreach($pendingInvitations as $invitation)
                     <div class="invitation-card">
-
                         <div class="invitation-text">
                             {{ $invitation->group->group_name }}
                         </div>
-
                         <div class="invitation-buttons">
                             <form action="{{ route('invitation.respond') }}" method="POST"
                                 style="display: flex; gap: 10px;">
@@ -386,11 +378,7 @@ $taskDone     = $taskBuilder ? (clone $taskBuilder)->where('status', 'completed'
                 @endforeach
             </div>
         @endif
-
     </main>
-
-    
-
 </section>
 
 {{-- ➃完了タスク一覧 --}}
