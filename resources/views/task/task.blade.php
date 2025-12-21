@@ -98,7 +98,7 @@
 
                     <input
                       type="checkbox"
-                      onclick="event.stopPropagation(); event.preventDefault();"
+                      onclick="event.stopPropagation();"
                       onchange="completeTask({{ $task->id }}, this)"
                     >
 
@@ -253,7 +253,8 @@
               })
               .then(response => {
                   if (response.ok) {
-                      const row = checkbox.closest('tr');
+                      // const row = checkbox.closest('tr');
+                      const row = checkbox.closest('.task-row-link');
                       if (row) row.remove();
                   } else {
                       alert('更新に失敗しました (status not ok)');
