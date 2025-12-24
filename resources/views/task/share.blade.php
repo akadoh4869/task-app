@@ -111,68 +111,212 @@
                   {{-- グループタスク表示 --}}
                   {{-- ▼ グループタスク：リスト表示 --}}
                   <section id="content-list" class="content active">
-                    <div class="task-list">
+                    <div class="kanban">
 
-                      @forelse ($groupTasks as $task)
-
-                        <a href="{{ route('task.detail', $task->id) }}" class="task-row-link">
-
-                          {{-- 左：期間 --}}
-                          <div class="task-date">
-                            {{ optional($task->start_date)->format('md') ?? '未設定' }}〜
-                            {{ optional($task->due_date)->format('md') ?? '未設定' }}
-                          </div>
-
-                          {{-- 右：チェック＋本文 --}}
-                          <div class="task-main">
-                            <input
-                              type="checkbox"
-                              onclick="event.stopPropagation();"
-                              onchange="completeTask({{ $task->id }}, this)"
-                            >
-
-                            <div class="task-text">
-                              {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
-
-                              {{-- ▼ 担当メンバーラベル --}}
-                              @if ($task->group)
-                                @php
-                                  // 多対多: task_user 経由のリレーション
-                                  $assignees = $task->assignedUsers ?? collect();
-                                @endphp
-
-                                <span class="task-group-label-wrap">
-                                  @if ($assignees->isNotEmpty())
-                                    @foreach ($assignees as $user)
-                                      <span class="task-assignee-label">
-                                        {{ $user->user_name }}
-                                      </span>
-                                    @endforeach
-                                  @else
-                                    <span class="task-assignee-label is-shared">
-                                      共有
-                                    </span>
-                                  @endif
-                                </span> 
-                              @endif
-                            </div>
-                          </div>
-
-                        </a>
-
-                      @empty
-                        {{-- ★ タスクがないときも、同じ .task-row-link の中で表示する --}}
-                        <div class="task-row-link task-row-empty">
-                          <div class="task-main">
-                            <div class="task-text">
-                              現在、グループタスクはありません。
-                            </div>
-                          </div>
+                      {{-- ==========================
+                          未着手
+                      =========================== --}}
+                      <div class="kanban-col">
+                        <div class="kanban-col-head head-not-started">
+                          <span>未着手</span>
+                          <span class="kanban-count">{{ $groupTasks->where('status', 'not_started')->count() }}</span>
                         </div>
-                      @endforelse
+
+                        <div class="kanban-col-body">
+                          @forelse ($groupTasks->where('status', 'not_started') as $task)
+
+                            <a href="{{ route('task.detail', $task->id) }}"
+                              class="task-card task-row-link"
+                              data-task-id="{{ $task->id }}">
+
+                              @if ($task->start_date || $task->due_date)
+                                <div class="task-date">
+                                  @if ($task->start_date)
+                                    {{ $task->start_date->format('m/d') }}
+                                  @endif
+
+                                  @if ($task->start_date && $task->due_date)
+                                    〜
+                                  @endif
+
+                                  @if ($task->due_date)
+                                    {{ $task->due_date->format('m/d') }}
+                                  @endif
+                                </div>
+                              @endif
+                              
+                              <div class="task-main">
+                                <input
+                                  type="checkbox"
+                                  onclick="event.stopPropagation();"
+                                  onchange="completeTask({{ $task->id }}, this)"
+                                >
+
+                                <div class="task-text">
+                                  {{ $task->task_name }}
+
+                                  {{-- ▼ 担当メンバーラベル（グループタスク） --}}
+                                  @php
+                                    $assignees = $task->assignedUsers ?? collect();
+                                  @endphp
+
+                                  <span class="task-group-label-wrap">
+                                    @if ($assignees->isNotEmpty())
+                                      @foreach ($assignees as $user)
+                                        <span class="task-assignee-label">
+                                          {{ $user->user_name }}
+                                        </span>
+                                      @endforeach
+                                    @else
+                                      <span class="task-assignee-label is-shared">共有</span>
+                                    @endif
+                                  </span>
+                                </div>
+                              </div>
+                            </a>
+
+                          @empty
+                            <p class="empty-text">未着手のタスクはありません</p>
+                          @endforelse
+                        </div>
+                      </div>
+
+
+                      {{-- ==========================
+                          進行中
+                      =========================== --}}
+                      <div class="kanban-col">
+                        <div class="kanban-col-head head-in-progress">
+                          <span>進行中</span>
+                          <span class="kanban-count">{{ $groupTasks->where('status', 'in_progress')->count() }}</span>
+                        </div>
+
+                        <div class="kanban-col-body">
+                          @forelse ($groupTasks->where('status', 'in_progress') as $task)
+
+                            <a href="{{ route('task.detail', $task->id) }}"
+                              class="task-card task-row-link"
+                              data-task-id="{{ $task->id }}">
+
+                              @if ($task->start_date || $task->due_date)
+                                <div class="task-date">
+                                  @if ($task->start_date)
+                                    {{ $task->start_date->format('m/d') }}
+                                  @endif
+
+                                  @if ($task->start_date && $task->due_date)
+                                    〜
+                                  @endif
+
+                                  @if ($task->due_date)
+                                    {{ $task->due_date->format('m/d') }}
+                                  @endif
+                                </div>
+                              @endif
+                            
+                              <div class="task-main">
+                                <input
+                                  type="checkbox"
+                                  onclick="event.stopPropagation();"
+                                  onchange="completeTask({{ $task->id }}, this)"
+                                >
+
+                                <div class="task-text">
+                                  {{ $task->task_name }}
+
+                                  @php
+                                    $assignees = $task->assignedUsers ?? collect();
+                                  @endphp
+
+                                  <span class="task-group-label-wrap">
+                                    @if ($assignees->isNotEmpty())
+                                      @foreach ($assignees as $user)
+                                        <span class="task-assignee-label">
+                                          {{ $user->user_name }}
+                                        </span>
+                                      @endforeach
+                                    @else
+                                      <span class="task-assignee-label is-shared">共有</span>
+                                    @endif
+                                  </span>
+                                </div>
+                              </div>
+                            </a>
+
+                          @empty
+                            <p class="empty-text">進行中のタスクはありません</p>
+                          @endforelse
+                        </div>
+                      </div>
+
+
+                      {{-- ==========================
+                          完了
+                      =========================== --}}
+                      <div class="kanban-col">
+                        <div class="kanban-col-head head-completed">
+                          <span>完了</span>
+                          <span class="kanban-count">{{ $groupTasks->where('status', 'completed')->count() }}</span>
+                        </div>
+
+                        <div class="kanban-col-body">
+                          @forelse ($groupTasks->where('status', 'completed') as $task)
+
+                            <a href="{{ route('task.detail', $task->id) }}"
+                              class="task-card task-row-link is-completed"
+                              data-task-id="{{ $task->id }}">
+
+                              @if ($task->start_date || $task->due_date)
+                                <div class="task-date">
+                                  @if ($task->start_date)
+                                    {{ $task->start_date->format('m/d') }}
+                                  @endif
+
+                                  @if ($task->start_date && $task->due_date)
+                                    〜
+                                  @endif
+
+                                  @if ($task->due_date)
+                                    {{ $task->due_date->format('m/d') }}
+                                  @endif
+                                </div>
+                              @endif
+
+                              <div class="task-main">
+                                {{-- 完了は固定チェック --}}
+                                <input type="checkbox" checked disabled onclick="event.stopPropagation();">
+
+                                <div class="task-text">
+                                  {{ $task->task_name }}
+
+                                  @php
+                                    $assignees = $task->assignedUsers ?? collect();
+                                  @endphp
+
+                                  <span class="task-group-label-wrap">
+                                    @if ($assignees->isNotEmpty())
+                                      @foreach ($assignees as $user)
+                                        <span class="task-assignee-label">
+                                          {{ $user->user_name }}
+                                        </span>
+                                      @endforeach
+                                    @else
+                                      <span class="task-assignee-label is-shared">共有</span>
+                                    @endif
+                                  </span>
+                                </div>
+                              </div>
+                            </a>
+
+                          @empty
+                            <p class="empty-text">完了タスクはありません</p>
+                          @endforelse
+                        </div>
+                      </div>
 
                     </div>
                   </section>
+
 
 
                   {{-- カレンダー --}}

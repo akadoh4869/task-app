@@ -79,51 +79,159 @@
 
        
         <div class="tab-container">
-           {{-- リストの内容 --}}
           <section id="content-list" class="content active">
-            <div class="task-list">
+            <div class="kanban">
 
-              @foreach ($allPersonalTasks as $task)
+              {{-- 未着手 --}}
+              <div class="kanban-col">
+                <div class="kanban-col-head">
+                  <span>未着手</span>
+                  <span class="kanban-count">{{ $allPersonalTasks->where('status', 'not_started')->count() }}</span>
+                </div>
 
-                <a href="{{ route('task.detail', $task->id) }}" class="task-row-link">
+                <div class="kanban-col-body">
+                  @foreach ($allPersonalTasks->where('status', 'not_started') as $task)
+                    <a href="{{ route('task.detail', $task->id) }}" class="task-card task-row-link" data-task-id="{{ $task->id }}">
+                      @if ($task->start_date || $task->due_date)
+                        <div class="task-date">
+                          @if ($task->start_date)
+                            {{ $task->start_date->format('m/d') }}
+                          @endif
 
-                  {{-- 左：期日 --}}
-                  <div class="task-date">
-                    {{ optional($task->start_date)->format('md') ?? '未設定' }}〜
-                    {{ optional($task->due_date)->format('md') ?? '未設定' }}
-                  </div>
+                          @if ($task->start_date && $task->due_date)
+                            〜
+                          @endif
 
-                  {{-- 右：チェック＋本文 --}}
-                  <div class="task-main">
-
-                    <input
-                      type="checkbox"
-                      onclick="event.stopPropagation();"
-                      onchange="completeTask({{ $task->id }}, this)"
-                    >
-
-                    <div class="task-text">
-                      {{ $task->getStatusLabel() }}のタスク：{{ $task->task_name }}
-
-                      @if ($task->group)
-                        <span class="task-group-label">
-                          {{ $task->group->group_name }}
-                        </span>
+                          @if ($task->due_date)
+                            {{ $task->due_date->format('m/d') }}
+                          @endif
+                        </div>
                       @endif
+
+                      <div class="task-main">
+                        <input
+                          type="checkbox"
+                          onclick="event.stopPropagation();"
+                          onchange="completeTask({{ $task->id }}, this)"
+                        >
+
+                        <div class="task-text">
+                          {{ $task->task_name }}
+                          @if ($task->group)
+                            <span class="task-group-label">{{ $task->group->group_name }}</span>
+                          @endif
+                        </div>
+                      </div>
+                    </a>
+                  @endforeach
+
+                  @if ($allPersonalTasks->where('status','not_started')->isEmpty())
+                    <p class="empty-text">未着手のタスクはありません</p>
+                  @endif
+                </div>
+              </div>
+
+              {{-- 進行中 --}}
+              <div class="kanban-col">
+                <div class="kanban-col-head">
+                  <span>進行中</span>
+                  <span class="kanban-count">{{ $allPersonalTasks->where('status', 'in_progress')->count() }}</span>
+                </div>
+
+                <div class="kanban-col-body">
+                  @foreach ($allPersonalTasks->where('status', 'in_progress') as $task)
+                    <a href="{{ route('task.detail', $task->id) }}" class="task-card task-row-link" data-task-id="{{ $task->id }}">
+                      @if ($task->start_date || $task->due_date)
+                        <div class="task-date">
+                          @if ($task->start_date)
+                            {{ $task->start_date->format('m/d') }}
+                          @endif
+
+                          @if ($task->start_date && $task->due_date)
+                            〜
+                          @endif
+
+                          @if ($task->due_date)
+                            {{ $task->due_date->format('m/d') }}
+                          @endif
+                        </div>
+                      @endif
+
+                      <div class="task-main">
+                        <input
+                          type="checkbox"
+                          onclick="event.stopPropagation();"
+                          onchange="completeTask({{ $task->id }}, this)"
+                        >
+
+                        <div class="task-text">
+                          {{ $task->task_name }}
+                          @if ($task->group)
+                            <span class="task-group-label">{{ $task->group->group_name }}</span>
+                          @endif
+                        </div>
+                      </div>
+                    </a>
+                  @endforeach
+
+                  @if ($allPersonalTasks->where('status','in_progress')->isEmpty())
+                    <p class="empty-text">進行中のタスクはありません</p>
+                  @endif
+                </div>
+              </div>
+
+
+              {{-- 完了 --}}
+            <div class="kanban-col">
+              <div class="kanban-col-head head-completed">
+                <span>完了</span>
+                <span class="kanban-count">{{ $completedTasks->count() }}</span>
+              </div>
+
+              <div class="kanban-col-body" id="kanban-completed-body">
+                @forelse ($completedTasks as $task)
+                  <a href="{{ route('task.detail', $task->id) }}"
+                    class="task-card task-row-link is-completed"
+                    data-task-id="{{ $task->id }}">
+
+                    @if ($task->start_date || $task->due_date)
+                      <div class="task-date">
+                        @if ($task->start_date)
+                          {{ $task->start_date->format('m/d') }}
+                        @endif
+
+                        @if ($task->start_date && $task->due_date)
+                          〜
+                        @endif
+
+                        @if ($task->due_date)
+                          {{ $task->due_date->format('m/d') }}
+                        @endif
+                      </div>
+                    @endif
+
+                    <div class="task-main">
+                      {{-- 完了列は固定チェック --}}
+                      <input type="checkbox" checked disabled onclick="event.stopPropagation();">
+
+                      <div class="task-text">
+                        {{ $task->task_name }}
+                        @if ($task->group)
+                          <span class="task-group-label">{{ $task->group->group_name }}</span>
+                        @endif
+                      </div>
                     </div>
+                  </a>
 
-                  </div>
-
-                </a>
-
-              @endforeach
-
-              @if ($allPersonalTasks->isEmpty())
-                <p>現在、{{ $year }}年のタスクはありません。</p>
-              @endif
+                @empty
+                  <p class="empty-text">完了タスクはありません</p>
+                @endforelse
+              </div>
+            </div>
 
             </div>
           </section>
+
 
           {{-- カレンダー --}}
           <section id="content-calendar" class="content">

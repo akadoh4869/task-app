@@ -44,43 +44,121 @@ ul{
 }
 
 /* 📌 リスト全体の調整 */
-.task-list {
-  width: 100%;
-}
-
-.task-row-link {
-  display: flex;
+.kanban{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
   align-items: center;
   justify-content: flex-start;
   width: 69%;
   margin-left: 15%;
-  /* margin: 10px auto;   中央寄せ */
   text-decoration: none;
   color: #333;
-  background: #fff;
   padding: 10px;
 }
 
-.task-row-link:hover {
-  background-color: #f5f7fa;
+.kanban-col{
+  border: 1px solid black;
+  border-radius: 12px;
+  padding: 10px;
+  min-height: 300px;
+  display: flex;          /* ✅ 追加 */
+  flex-direction: column; /* ✅ 追加 */
+  height: 560px;          /* ✅ 好みで調整（固定したい高さ） */
+  overflow: hidden;       /* ✅ 追加（外側はスクロールさせない） */
 }
 
-/* 左：期日 */
-.task-date {
-  width: 130px;
-  text-align: center;
-  border-right: 1px solid #ccc;
-  font-size: 14px;
-  padding: 8px 0;
+.kanban-col-head{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  font-weight: 400;
+  color: #000;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  position: sticky; /* ✅ 追加 */
+  top: 0;           /* ✅ 追加 */
+  z-index: 5;       /* ✅ 追加 */
 }
 
-/* 右：本文 */
-.task-main {
-  display: flex;
-  align-items: center;
+/* 🟢 未着手（1列目） */
+.kanban-col:nth-child(1) .kanban-col-head{
+  background-color: #a1ff1a;
+}
+
+/* 🔵 進行中（2列目） */
+.kanban-col:nth-child(2) .kanban-col-head{
+  background-color: #38b6ff;
+}
+
+/* 🌸 完了（3列目：今まで通りピンク） */
+.kanban-col:nth-child(3) .kanban-col-head{
+  background-color: #ff66c4;
+}
+
+.kanban-count{
+  font-size: 12px;
+  background: rgba(255,255,255,.12);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.kanban-col-body{
+  display:flex;
+  flex-direction: column;
   gap: 10px;
+  flex: 1;              /* ✅ 追加（残り全部） */
+  overflow-y: auto;     /* ✅ 追加 */
+  padding-right: 6px;   /* ✅ スクロールバー分 */
+  
+}
+
+/* スクロールバー見た目（任意） */
+.kanban-col-body::-webkit-scrollbar{
+  width: 8px;
+}
+.kanban-col-body::-webkit-scrollbar-thumb{
+  background: rgba(0,0,0,.2);
+  border-radius: 999px;
+}
+
+.task-card{
+  display:block;
+  background: #f5f5f5;
+  border-radius: 12px;
+  padding: 10px;
+  color: black;
+  text-decoration: none;
+  /* border-bottom: 1px solid black; */
+}
+
+.task-card:hover{
+  background: #ccc;
+}
+
+.task-date{
+  font-size: 12px;
+  opacity: .85;
+  margin-bottom: 8px;
+}
+
+.task-main{
+  display:flex;
+  gap: 10px;
+  align-items: center;
   padding: 0 10px;
   flex: 1;
+}
+
+.task-text{
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+ .task-date {
+  width: 130px;
+  text-align: center;
 }
 
 .task-group-label {
@@ -90,7 +168,26 @@ ul{
   border-radius: 999px;
   border: 1px solid #ccc;
   background: #f9f9f9;
+} 
+
+
+.is-completed{
+  opacity: .7;
 }
+
+.empty-text{
+  color: rgba(255,255,255,.6);
+  font-size: 13px;
+  padding: 8px;
+}
+
+/* スマホ */
+@media (max-width: 900px){
+  .kanban{
+    grid-template-columns: 1fr;
+  }
+}
+
 
 /*カレンダー*/
 /* =========================================================
