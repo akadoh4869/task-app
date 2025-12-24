@@ -14,10 +14,10 @@ use App\Models\GroupInvitation; // ← これを追加
 class TaskController extends Controller
 {
     
-    public function index(Request $request)
+   public function index(Request $request)
     {
         $user = Auth::user();
-        $year = $request->input('year', 2025); // デフォルトは2025年
+        $year = (int) $request->input('year', 2025);
 
         $groups = $user->groups()->with(['users', 'tasks.assignedUsers'])->get();
 
@@ -35,19 +35,26 @@ class TaskController extends Controller
         // 両方マージし重複除去
         $allTasks = $createdTasks->merge($assignedTasks)->unique('id');
 
-        // 選択年に絞り込み（due_dateがその年 or due_dateがnullのものも常に表示）
-        $filteredTasks = $allTasks->filter(function ($task) use ($year) {
-            $isInYear = is_null($task->due_date) || $task->due_date->year == $year;
-            $isNotCompleted = $task->status !== 'completed';
-            return $isInYear && $isNotCompleted;
-        })->sortBy(function ($task) {
-            return $task->due_date ?? now()->addYears(100);
+        // 年で絞り込み（due_date null も含める）
+        $inYearTasks = $allTasks->filter(function ($task) use ($year) {
+            return is_null($task->due_date) || $task->due_date->year == $year;
         });
+
+        // ✅ 未完了
+        $activeTasks = $inYearTasks
+            ->where('status', '!=', 'completed')
+            ->sortBy(fn($task) => $task->due_date ?? now()->addYears(100));
+
+        // ✅ 完了
+        $completedTasks = $inYearTasks
+            ->where('status', 'completed')
+            ->sortByDesc(fn($task) => $task->updated_at ?? $task->due_date ?? now());
 
         return view('task.task', [
             'user' => $user,
             'groups' => $groups,
-            'allPersonalTasks' => $filteredTasks,
+            'allPersonalTasks' => $activeTasks,      // ← これまで通り未完了（未着手/進行中）
+            'completedTasks'   => $completedTasks,   // ← ★追加：完了列用
             'year' => $year,
         ]);
     }
@@ -152,149 +159,82 @@ class TaskController extends Controller
         return redirect('/task')->with('success', 'タスクを登録しました！');
     }
 
-    // public function share(Request $request)
-    // {
-    //     $user = Auth::user();
-    //     $year = (int) $request->input('year', 2025);
-
-    //     $groups = $user->groups()->orderBy('created_at')->get();
-    //     $selectedGroupId = $request->input('group_id');
-
-    //     if ($selectedGroupId === 'create') {
-    //         return redirect()->route('group.create');
-    //     }
-
-    //     if ($selectedGroupId !== null) {
-    //         session(['selected_group_id' => $selectedGroupId]);
-    //     } else {
-    //         $selectedGroupId = session('selected_group_id');
-    //         if (!$selectedGroupId && $groups->isNotEmpty()) {
-    //             $selectedGroupId = $groups->first()->id;
-    //             session(['selected_group_id' => $selectedGroupId]);
-    //         }
-    //     }
-
-    //     $groupTasks = collect();
-    //     $selectedGroup = null;
-    //     $groupMembers = collect();
-    //     $inviteCandidates = collect();
-
-    //     if ($selectedGroupId && $groups->pluck('id')->contains((int)$selectedGroupId)) {
-    //         $selectedGroup = Group::find($selectedGroupId);
-
-    //         $groupTasks = Task::where('group_id', $selectedGroupId)
-    //             ->where('status', '!=', 'completed')
-    //             ->with('assignedUsers')
-    //             ->get()
-    //             ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
-    //             ->sortBy(fn($task) => $task->due_date ?? now()->addYears(100));
-
-    //         $groupMembers = $selectedGroup->users;
-
-    //         if ($request->filled('search_user')) {
-    //             $keyword = $request->input('search_user');
-    //             $inviteCandidates = User::where('user_name', 'like', "%$keyword%")
-    //                 ->whereNotIn('id', $groupMembers->pluck('id'))
-    //                 ->get();
-    //         }
-    //     }
-
-    //     $pendingInvitedUserIds = GroupInvitation::where('group_id', $selectedGroupId)
-    //     ->where('status', 'pending')
-    //     ->pluck('invitee_id');
-
-    //     $pendingInvitedUsers = User::whereIn('id', $pendingInvitedUserIds)->get();
-
-    //     return view('task.share', [
-    //         'groups' => $groups,
-    //         'selectedGroupId' => $selectedGroupId,
-    //         'groupTasks' => $groupTasks,
-    //         'year' => $year,
-    //         'selectedGroup' => $selectedGroup,
-    //         'groupMembers' => $groupMembers,
-    //         'inviteCandidates' => $inviteCandidates,
-    //         'pendingInvitedUserIds' => $pendingInvitedUserIds,
-    //         'pendingInvitedUsers' => $pendingInvitedUsers, // ✅ これを追加
-    //     ]);
-    // }
-
     public function share(Request $request)
-{
-    $user = Auth::user();
-    $year = (int) $request->input('year', 2025);
+    {
+        $user = Auth::user();
+        $year = (int) $request->input('year', 2025);
 
-    $groups = $user->groups()->orderBy('created_at')->get();
-    $selectedGroupId = $request->input('group_id');
+        $groups = $user->groups()->orderBy('created_at')->get();
+        $selectedGroupId = $request->input('group_id');
 
-    if ($selectedGroupId === 'create') {
-        return redirect()->route('group.create');
-    }
-
-    if ($selectedGroupId !== null) {
-        session(['selected_group_id' => $selectedGroupId]);
-    } else {
-        $selectedGroupId = session('selected_group_id');
-        if (!$selectedGroupId && $groups->isNotEmpty()) {
-            $selectedGroupId = $groups->first()->id;
-            session(['selected_group_id' => $selectedGroupId]);
+        if ($selectedGroupId === 'create') {
+            return redirect()->route('group.create');
         }
-    }
 
-    $groupTasks      = collect();
-    $completedTasks  = collect();   // ★ 追加：完了タスク用
-    $selectedGroup   = null;
-    $groupMembers    = collect();
-    $inviteCandidates = collect();
+        if ($selectedGroupId !== null) {
+            session(['selected_group_id' => $selectedGroupId]);
+        } else {
+            $selectedGroupId = session('selected_group_id');
+            if (!$selectedGroupId && $groups->isNotEmpty()) {
+                $selectedGroupId = $groups->first()->id;
+                session(['selected_group_id' => $selectedGroupId]);
+            }
+        }
 
-    if ($selectedGroupId && $groups->pluck('id')->contains((int)$selectedGroupId)) {
-        $selectedGroup = Group::find($selectedGroupId);
+        $groupTasks      = collect();
+        $completedTasks  = collect();   // ★ 追加：完了タスク用
+        $selectedGroup   = null;
+        $groupMembers    = collect();
+        $inviteCandidates = collect();
 
-        // ▼ 未完了タスク
-        $groupTasks = Task::where('group_id', $selectedGroupId)
-            ->where('status', '!=', 'completed')
+        if ($selectedGroupId && $groups->pluck('id')->contains((int)$selectedGroupId)) {
+            $selectedGroup = Group::find($selectedGroupId);
+
+            // ▼ 未完了タスク
+            $groupTasks = Task::where('group_id', $selectedGroupId)
             ->with('assignedUsers')
             ->get()
             ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
             ->sortBy(fn($task) => $task->due_date ?? now()->addYears(100));
 
-        // ▼ 完了タスク（右側の一覧用）
-        $completedTasks = Task::where('group_id', $selectedGroupId)
-            ->where('status', 'completed')
-            ->with('assignedUsers')
-            ->get()
-            ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
-            // 期限の新しいもの or 更新日の新しいものを上にしたいイメージ
-            ->sortByDesc(fn($task) => $task->updated_at ?? $task->due_date ?? now());
+            // ▼ 完了タスク（右側の一覧用）
+            $completedTasks = Task::where('group_id', $selectedGroupId)
+                ->where('status', 'completed')
+                ->with('assignedUsers')
+                ->get()
+                ->filter(fn($task) => is_null($task->due_date) || $task->due_date->year == $year)
+                // 期限の新しいもの or 更新日の新しいものを上にしたいイメージ
+                ->sortByDesc(fn($task) => $task->updated_at ?? $task->due_date ?? now());
 
-        $groupMembers = $selectedGroup->users;
+            $groupMembers = $selectedGroup->users;
 
-        if ($request->filled('search_user')) {
-            $keyword = $request->input('search_user');
-            $inviteCandidates = User::where('user_name', 'like', "%$keyword%")
-                ->whereNotIn('id', $groupMembers->pluck('id'))
-                ->get();
+            if ($request->filled('search_user')) {
+                $keyword = $request->input('search_user');
+                $inviteCandidates = User::where('user_name', 'like', "%$keyword%")
+                    ->whereNotIn('id', $groupMembers->pluck('id'))
+                    ->get();
+            }
         }
+
+        $pendingInvitedUserIds = GroupInvitation::where('group_id', $selectedGroupId)
+            ->where('status', 'pending')
+            ->pluck('invitee_id');
+
+        $pendingInvitedUsers = User::whereIn('id', $pendingInvitedUserIds)->get();
+
+        return view('task.share', [
+            'groups'              => $groups,
+            'selectedGroupId'     => $selectedGroupId,
+            'groupTasks'          => $groupTasks,
+            'completedTasks'      => $completedTasks,   // ★ ここでビューに渡す
+            'year'                => $year,
+            'selectedGroup'       => $selectedGroup,
+            'groupMembers'        => $groupMembers,
+            'inviteCandidates'    => $inviteCandidates,
+            'pendingInvitedUserIds' => $pendingInvitedUserIds,
+            'pendingInvitedUsers'   => $pendingInvitedUsers,
+        ]);
     }
-
-    $pendingInvitedUserIds = GroupInvitation::where('group_id', $selectedGroupId)
-        ->where('status', 'pending')
-        ->pluck('invitee_id');
-
-    $pendingInvitedUsers = User::whereIn('id', $pendingInvitedUserIds)->get();
-
-    return view('task.share', [
-        'groups'              => $groups,
-        'selectedGroupId'     => $selectedGroupId,
-        'groupTasks'          => $groupTasks,
-        'completedTasks'      => $completedTasks,   // ★ ここでビューに渡す
-        'year'                => $year,
-        'selectedGroup'       => $selectedGroup,
-        'groupMembers'        => $groupMembers,
-        'inviteCandidates'    => $inviteCandidates,
-        'pendingInvitedUserIds' => $pendingInvitedUserIds,
-        'pendingInvitedUsers'   => $pendingInvitedUsers,
-    ]);
-}
 
 
 
