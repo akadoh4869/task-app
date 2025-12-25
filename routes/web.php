@@ -30,6 +30,10 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 // タスク一覧（メイン）
 Route::get('/task', [TaskController::class, 'index'])->name('task.task');
+// routes/web.php
+Route::patch('/tasks/{task}/complete', [TaskController::class, 'complete'])
+  ->name('tasks.complete');
+
 
 // タスク作成
 Route::get('/create', [TaskController::class, 'create'])->name('tasks.create');
