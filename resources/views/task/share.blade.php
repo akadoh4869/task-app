@@ -119,10 +119,10 @@
                       <div class="kanban-col">
                         <div class="kanban-col-head head-not-started">
                           <span>未着手</span>
-                          <span class="kanban-count">{{ $groupTasks->where('status', 'not_started')->count() }}</span>
+                          <span class="kanban-count" id="count-not_started">{{ $groupTasks->where('status', 'not_started')->count() }}</span>
                         </div>
 
-                        <div class="kanban-col-body">
+                        <div class="kanban-col-body" id="col-not_started">
                           @forelse ($groupTasks->where('status', 'not_started') as $task)
 
                             <a href="{{ route('task.detail', $task->id) }}"
@@ -150,6 +150,7 @@
                                   type="checkbox"
                                   onclick="event.stopPropagation();"
                                   onchange="completeTask({{ $task->id }}, this)"
+                                  data-task-id="{{ $task->id }}"
                                 >
 
                                 <div class="task-text">
@@ -188,10 +189,10 @@
                       <div class="kanban-col">
                         <div class="kanban-col-head head-in-progress">
                           <span>進行中</span>
-                          <span class="kanban-count">{{ $groupTasks->where('status', 'in_progress')->count() }}</span>
+                          <span class="kanban-count" id="count-in_progress">{{ $groupTasks->where('status', 'in_progress')->count() }}</span>
                         </div>
 
-                        <div class="kanban-col-body">
+                        <div class="kanban-col-body" id="col-in_progress">
                           @forelse ($groupTasks->where('status', 'in_progress') as $task)
 
                             <a href="{{ route('task.detail', $task->id) }}"
@@ -219,6 +220,7 @@
                                   type="checkbox"
                                   onclick="event.stopPropagation();"
                                   onchange="completeTask({{ $task->id }}, this)"
+                                  data-task-id="{{ $task->id }}"
                                 >
 
                                 <div class="task-text">
@@ -256,10 +258,10 @@
                       <div class="kanban-col">
                         <div class="kanban-col-head head-completed">
                           <span>完了</span>
-                          <span class="kanban-count">{{ $groupTasks->where('status', 'completed')->count() }}</span>
+                          <span class="kanban-count" id="count-completed">{{ $groupTasks->where('status', 'completed')->count() }}</span>
                         </div>
 
-                        <div class="kanban-col-body">
+                        <div class="kanban-col-body" id="col-completed">
                           @forelse ($groupTasks->where('status', 'completed') as $task)
 
                             <a href="{{ route('task.detail', $task->id) }}"
@@ -530,34 +532,84 @@
   </div>
   <script>
     function completeTask(taskId, checkbox) {
-        setTimeout(() => {
-            fetch(`/task/${taskId}/status`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    _method: 'PATCH',
-                    status: 'completed'
-                })
-            })
-            .then(response => {
-                if (response.ok) {
-                    // const row = checkbox.closest('tr');
-                    const row = checkbox.closest('.task-row-link');
-                    if (row) row.remove();
-                } else {
-                    alert('更新に失敗しました (status not ok)');
-                    checkbox.checked = false;
-                }
-            })
-            .catch((err) => {
-                alert('通信エラー: ' + err.message);
-                checkbox.checked = false;
-            });
-        }, 1000);
+      if (!checkbox.checked) return;
+
+      const csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+      // ✅ いま押したチェックが入っているカード（aタグ）を取る
+      const card = checkbox.closest('a.task-card.task-row-link') || checkbox.closest('.task-row-link');
+      if (!card) return;
+
+      // ✅ どの列から来たか判定（col-not_started / col-in_progress）
+      const fromColBody = card.closest('.kanban-col-body');
+      const fromColId = fromColBody ? fromColBody.id : null;       // col-not_started など
+      const fromStatus = fromColId ? fromColId.replace('col-', '') : null; // not_started など
+
+      checkbox.disabled = true;
+
+      fetch(`/task/${taskId}/status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrf,
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          _method: 'PATCH',
+          status: 'completed'
+        })
+      })
+      .then(async (response) => {
+        if (!response.ok) {
+          checkbox.checked = false;
+          checkbox.disabled = false;
+          alert('更新に失敗しました (status not ok)');
+          return;
+        }
+
+        // ✅ サーバーが task を返してくれるなら使う（無ければ後でフォールバック）
+        let json = null;
+        try { json = await response.json(); } catch(e) {}
+
+        // ✅ ① まず元の列から消す（removeでもOKだが、完了列へ入れるなら移動がラク）
+        // card.remove();
+
+        // ✅ ② 完了列へ「カードをそのまま移動」する（見た目も担当者ラベルもそのまま残る）
+        const completedCol = document.getElementById('col-completed');
+        if (completedCol) {
+          // 完了用の見た目にする（class & checkbox固定）
+          card.classList.add('is-completed');
+
+          // チェックボックスを「checked + disabled」にして完了状態っぽく
+          checkbox.checked = true;
+          checkbox.disabled = true;
+
+          // もし「完了列ではクリックで詳細に飛べる」が維持したいなら a はそのままでOK
+          completedCol.prepend(card);
+        } else {
+          // 完了列が見つからなければ消すだけ
+          card.remove();
+        }
+
+        // ✅ ③ 件数の更新
+        if (fromStatus) bumpCount(fromStatus, -1);
+        bumpCount('completed', +1);
+
+      })
+      .catch((err) => {
+        alert('通信エラー: ' + err.message);
+        checkbox.checked = false;
+        checkbox.disabled = false;
+      });
     }
+
+    function bumpCount(status, delta) {
+      const el = document.getElementById(`count-${status}`);
+      if (!el) return;
+      const n = Number(el.textContent || 0);
+      el.textContent = String(Math.max(0, n + delta));
+    }
+
   </script>
 
     

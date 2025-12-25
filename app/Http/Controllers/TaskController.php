@@ -336,6 +336,29 @@ class TaskController extends Controller
         return back()->with('success', '選択されたタスクを完了に更新しました');
     }
 
+    public function complete(Request $request, Task $task)
+    {
+        // ✅ 自分のタスクだけ操作できるように（必要ならグループ権限も）
+        if ($task->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // ✅ ステータス更新（あなたのカラム名に合わせて変更）
+        $task->status = 'completed';             // 例：todo/doing/done
+        $task->completed_at = now();         // カラムが無ければ削除OK
+        $task->save();
+
+        return response()->json([
+            'ok' => true,
+            'task' => [
+                'id' => $task->id,
+                'task_name' => $task->task_name,
+                'status' => $task->status,
+                // 表示に必要なら日付なども返す
+            ],
+        ]);
+    }
+
 
 
 
