@@ -48,6 +48,9 @@ Route::patch('/task/{id}/detail', [TaskController::class, 'updateDetail'])->name
 // 完了タスクの復元
 Route::post('/tasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore');
 
+Route::post('/task/quick-add', [TaskController::class, 'quickAdd'])->name('task.quickAdd');
+
+
 // ==============================
 // グループ・共有関連
 // ==============================
