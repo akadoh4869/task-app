@@ -76,6 +76,8 @@ class TaskController extends Controller
             'start_date'         => 'nullable|date',
             'due_date'           => 'nullable|date|after_or_equal:start_date',
             'description'        => 'nullable|string',
+            'status' => 'nullable|string|in:not_started,in_progress,completed',
+
 
             // 画像（複数 & 単数の後方互換）
             'images'   => 'nullable|array',
@@ -96,7 +98,9 @@ class TaskController extends Controller
         $task->due_date    = $request->due_date;
         $task->description = $request->description;
         $task->created_by  = $user->id;
-        $task->status      = 'not_started';
+        // $task->status      = 'not_started';
+        $task->status = $request->input('status', 'not_started');
+
 
         // --- 個人 or グループ ---
         $typeValue = $request->task_type_combined;
@@ -155,6 +159,15 @@ class TaskController extends Controller
                 'type'          => 'file',
             ]);
         }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'id' => $task->id,
+                'task_name' => $task->task_name,
+                'status' => $task->status,
+            ]);
+        }
+
 
         return redirect('/task')->with('success', 'タスクを登録しました！');
     }
@@ -356,6 +369,34 @@ class TaskController extends Controller
                 'status' => $task->status,
                 // 表示に必要なら日付なども返す
             ],
+        ]);
+    }
+
+    
+    public function quickAdd(Request $request)
+    {
+        $request->validate([
+            'task_name' => 'required|string|max:255',
+            'status'    => 'required|string|in:not_started,in_progress,completed',
+        ]);
+
+        $user = auth()->user();
+
+        $task = new Task();
+        $task->task_name   = $request->task_name;
+        $task->status      = $request->status;
+        $task->created_by  = $user->id;
+
+        // ✅ 個人ページなので「個人タスク」として作る
+        $task->group_id    = null;
+        $task->assignee_id = $user->id;
+
+        $task->save();
+
+        return response()->json([
+            'id'        => $task->id,
+            'task_name' => $task->task_name,
+            'status'    => $task->status,
         ]);
     }
 

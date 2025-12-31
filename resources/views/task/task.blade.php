@@ -129,7 +129,21 @@
                   @if ($allPersonalTasks->where('status','not_started')->isEmpty())
                     <p class="empty-text">未着手のタスクはありません</p>
                   @endif
+
+                  {{-- ✅ ここを追加：クイック追加 --}}
+                  <div class="kanban-quickadd" data-status="not_started">
+                    <button type="button" class="quickadd-btn" aria-label="タスクを追加">＋</button>
+
+                    <div class="quickadd-form" style="display:none;">
+                      <input type="text"
+                            class="quickadd-input"
+                            placeholder="タスク名を入力して Enter"
+                            maxlength="100">
+                    </div>
+                  </div>
+                  
                 </div>
+                
               </div>
 
               {{-- 進行中 --}}
@@ -179,6 +193,18 @@
                   @if ($allPersonalTasks->where('status','in_progress')->isEmpty())
                     <p class="empty-text">進行中のタスクはありません</p>
                   @endif
+
+                  {{-- ✅ ここを追加：クイック追加 --}}
+                  <div class="kanban-quickadd" data-status="in_progress">
+                    <button type="button" class="quickadd-btn" aria-label="タスクを追加">＋</button>
+
+                    <div class="quickadd-form" style="display:none;">
+                      <input type="text"
+                            class="quickadd-input"
+                            placeholder="タスク名を入力して Enter"
+                            maxlength="100">
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -217,6 +243,7 @@
                   @empty
                     <p class="empty-text">完了タスクはありません</p>
                   @endforelse
+
                 </div>
               </div>
 
@@ -416,6 +443,129 @@
         const n = Number(el.textContent || 0);
         el.textContent = String(Math.max(0, n + delta));
       }
+
+      // =====================================
+      // ✅ カンバン各列の「＋」クイック追加（個人ページ）
+      // =====================================
+      document.addEventListener('DOMContentLoaded', () => {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        document.querySelectorAll('.kanban-quickadd').forEach((wrap) => {
+          const status = wrap.dataset.status; // not_started / in_progress / completed
+          const btn = wrap.querySelector('.quickadd-btn');
+          const form = wrap.querySelector('.quickadd-form');
+          const input = wrap.querySelector('.quickadd-input');
+          if (!btn || !form || !input) return;
+
+          const colIdMap = {
+            not_started: 'col-not_started',
+            in_progress: 'col-in_progress',
+            completed: 'col-completed',
+          };
+
+          btn.addEventListener('click', () => {
+            form.style.display = 'block';
+            input.value = '';
+            input.focus();
+          });
+
+          input.addEventListener('keydown', async (e) => {
+            if (e.key === 'Escape') {
+              form.style.display = 'none';
+              return;
+            }
+            if (e.key !== 'Enter') return;
+
+            e.preventDefault();
+
+            const name = input.value.trim();
+            if (!name) {
+              form.style.display = 'none';
+              return;
+            }
+
+            input.disabled = true;
+
+            try {
+              // ✅ あなたの既存ルートに合わせて /task にPOST
+              const res = await fetch('/task/quick-add', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': csrf,
+                  'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                  task_name: name,
+                  status: status,
+                }),
+              });
+
+              if (!res.ok) throw new Error('作成に失敗しました');
+
+              const data = await res.json(); // {id, task_name, status}
+
+              const col = document.getElementById(colIdMap[status]);
+              if (!col) throw new Error('追加先の列が見つかりません');
+
+              const a = document.createElement('a');
+              // ✅ あなたの詳細ルートに合わせる
+              a.href = `/task/detail/${data.id}`;
+              a.className = 'task-card task-row-link';
+              a.dataset.taskId = data.id;
+
+              a.innerHTML = `
+                <div class="task-main">
+                  <input
+                    type="checkbox"
+                    onclick="event.stopPropagation(); event.preventDefault();"
+                    onchange="completeTask(${data.id}, this)"
+                  >
+                  <div class="task-text">${escapeHtml(data.task_name)}</div>
+                </div>
+              `;
+
+              // ✅ 末尾に追加
+              // col.appendChild(a);
+              // ✅ 「＋」の直前に入れる（＝タスクは＋の上、＋は常に一番下）
+              const quickAdd = document.querySelector(`.kanban-quickadd[data-status="${status}"]`);
+              if (quickAdd) {
+                quickAdd.parentNode.insertBefore(a, quickAdd);
+              } else {
+                // 予備：見つからなければ末尾
+                col.appendChild(a);
+              }
+
+
+              // ✅ 件数 +1
+              bumpCount(status, +1);
+
+              form.style.display = 'none';
+
+            } catch (err) {
+              alert(err.message);
+            } finally {
+              input.disabled = false;
+            }
+          });
+
+          input.addEventListener('blur', () => {
+            if (!input.value.trim()) form.style.display = 'none';
+          });
+        });
+      });
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+
+     
 
     </script>
 

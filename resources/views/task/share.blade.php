@@ -179,6 +179,22 @@
                           @empty
                             <p class="empty-text">未着手のタスクはありません</p>
                           @endforelse
+
+
+                          {{-- ✅ ここを追加：クイック追加 --}}
+                          <div class="kanban-quickadd"
+                              data-status="not_started"
+                              data-task-type="group_{{ $selectedGroupId }}">
+                            <button type="button" class="quickadd-btn" aria-label="タスクを追加">＋</button>
+
+                            <div class="quickadd-form" style="display:none;">
+                              <input type="text"
+                                    class="quickadd-input"
+                                    placeholder="タスク名を入力して Enter"
+                                    maxlength="255">
+                            </div>
+                          </div>
+
                         </div>
                       </div>
 
@@ -248,6 +264,21 @@
                           @empty
                             <p class="empty-text">進行中のタスクはありません</p>
                           @endforelse
+
+                          {{-- ✅ ここを追加：クイック追加 --}}
+                          <div class="kanban-quickadd"
+                              data-status="in_progress"
+                              data-task-type="group_{{ $selectedGroupId }}">
+                            <button type="button" class="quickadd-btn" aria-label="タスクを追加">＋</button>
+
+                            <div class="quickadd-form" style="display:none;">
+                              <input type="text"
+                                    class="quickadd-input"
+                                    placeholder="タスク名を入力して Enter"
+                                    maxlength="255">
+                            </div>
+                          </div>
+
                         </div>
                       </div>
 
@@ -609,6 +640,138 @@
       const n = Number(el.textContent || 0);
       el.textContent = String(Math.max(0, n + delta));
     }
+
+    // =====================================
+    // ✅ 共有ページ：カンバン各列の「＋」クイック追加（タスク名だけ）
+    // =====================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+
+      document.querySelectorAll('.kanban-quickadd').forEach((wrap) => {
+        const status = wrap.dataset.status;          // not_started / in_progress / completed
+        const taskType = wrap.dataset.taskType;      // group_12 みたいなやつ
+        const btn = wrap.querySelector('.quickadd-btn');
+        const form = wrap.querySelector('.quickadd-form');
+        const input = wrap.querySelector('.quickadd-input');
+        if (!btn || !form || !input) return;
+
+        const colIdMap = {
+          not_started: 'col-not_started',
+          in_progress: 'col-in_progress',
+          completed: 'col-completed',
+        };
+
+        btn.addEventListener('click', () => {
+          form.style.display = 'block';
+          input.value = '';
+          input.focus();
+        });
+
+        input.addEventListener('keydown', async (e) => {
+          if (e.key === 'Escape') {
+            form.style.display = 'none';
+            return;
+          }
+          if (e.key !== 'Enter') return;
+
+          e.preventDefault();
+          const name = input.value.trim();
+          if (!name) {
+            form.style.display = 'none';
+            return;
+          }
+
+          input.disabled = true;
+
+          try {
+            // ✅ storeに必要な項目だけ送る（multipart不要）
+            const res = await fetch('/task', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+              },
+              body: JSON.stringify({
+                task_name: name,
+                task_type_combined: taskType, // ✅ group_XX
+                status: status,               // ✅ 列に合わせて保存
+              }),
+            });
+
+            // ✅ storeがredirect返すとjson()が失敗するので、まずOK判定
+            if (!res.ok) throw new Error('作成に失敗しました');
+
+            // ✅ store側を少しだけ修正してJSON返してもらうのが理想（下に書く）
+            const data = await res.json(); // {id, task_name, status}
+
+            const col = document.getElementById(colIdMap[status]);
+            if (!col) throw new Error('追加先の列が見つかりません');
+
+            const a = document.createElement('a');
+            a.href = `/task/detail/${data.id}`;
+            a.className = 'task-card task-row-link' + (status === 'completed' ? ' is-completed' : '');
+            a.dataset.taskId = data.id;
+
+            // ✅ 共有タスクなのでラベルは「共有」でOK（後で担当割当UIがあるなら拡張可）
+            const checkboxHtml = (status === 'completed')
+              ? `<input type="checkbox" checked disabled onclick="event.stopPropagation();">`
+              : `<input type="checkbox"
+                        onclick="event.stopPropagation();"
+                        onchange="completeTask(${data.id}, this)"
+                        data-task-id="${data.id}">`;
+
+            a.innerHTML = `
+              <div class="task-main">
+                ${checkboxHtml}
+                <div class="task-text">
+                  ${escapeHtml(data.task_name)}
+                  <span class="task-group-label-wrap">
+                    <span class="task-assignee-label is-shared">共有</span>
+                  </span>
+                </div>
+              </div>
+            `;
+
+            // ✅ 末尾に追加
+            // col.appendChild(a);
+            // ✅ 「＋」の直前に入れる（＝タスクは＋の上、＋は常に一番下）
+            const quickAdd = document.querySelector(`.kanban-quickadd[data-status="${status}"]`);
+            if (quickAdd) {
+              quickAdd.parentNode.insertBefore(a, quickAdd);
+            } else {
+              // 予備：見つからなければ末尾
+              col.appendChild(a);
+            }
+
+
+            // ✅ 件数更新
+            bumpCount(status, +1);
+
+            form.style.display = 'none';
+          } catch (err) {
+            alert(err.message);
+          } finally {
+            input.disabled = false;
+          }
+        });
+
+        input.addEventListener('blur', () => {
+          if (!input.value.trim()) form.style.display = 'none';
+        });
+      });
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
 
   </script>
 
